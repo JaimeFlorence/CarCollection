@@ -8,20 +8,121 @@
 │   Frontend      │    │    Backend      │    │   External      │
 │   (Next.js)     │◄──►│   (FastAPI)     │◄──►│   Services      │
 │                 │    │                 │    │                 │
-│ • Dashboard     │    │ • REST API      │    │ • Telegram Bot  │
-│ • Car Details   │    │ • Database      │    │ • SMS (Twilio)  │
-│ • Mobile PWA    │    │ • File Storage  │    │ • File Storage  │
+│ • Dashboard     │    │ • REST API      │    │ • Email Service │
+│ • Car Details   │    │ • Database      │    │ • File Storage  │
+│ • Mobile PWA    │    │ • Auth System   │    │ • SMS (Future)  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+## 🔐 Multi-Tenancy & Authentication
+
+### Multi-Tenancy Architecture ✅ DECIDED
+**Status**: High Priority - Implementation planned
+**Approach**: Database-level tenant isolation with user_id foreign keys
+**Benefits**: 
+- Each user has their own isolated car collection
+- Secure data separation
+- Scalable architecture
+- Easy to implement now vs. later
+
+### Authentication System ✅ DECIDED
+**Status**: Simple username/password with session tokens (preferred)
+**Features**:
+- Admin user creation for others
+- Email invitations for new users
+- Session-based authentication
+- Password hashing with bcrypt
+- JWT tokens for API access
+
+### User Management ✅ DECIDED
+**Status**: Hybrid approach - Admin creation + Email invitations
+**Features**:
+- Admins can create accounts for others
+- Email invitations sent to new users
+- User activation via email link
+- Role-based access control (Admin/User)
+
+### Authentication Methods Summary
+
+#### 1. Simple (Username/Password + Session) ✅ CHOSEN
+**Pros**:
+- Easy to implement and maintain
+- Familiar to users
+- Full control over authentication flow
+- No external dependencies
+- Works offline
+
+**Cons**:
+- Users need to remember another password
+- Need to handle password reset flows
+- Security depends on password strength
+
+**Implementation**:
+- FastAPI with session middleware
+- bcrypt for password hashing
+- JWT tokens for API authentication
+- Email verification for new accounts
+
+#### 2. OAuth (GitHub, Google, etc.)
+**Pros**:
+- No password management
+- Users trust familiar providers
+- Enhanced security
+- Quick sign-up process
+
+**Cons**:
+- External dependency on OAuth providers
+- More complex implementation
+- Requires app registration with providers
+- Potential privacy concerns
+
+#### 3. JWT-Only Authentication
+**Pros**:
+- Stateless authentication
+- Good for microservices
+- No server-side session storage
+
+**Cons**:
+- More complex token management
+- Harder to implement logout
+- Security considerations with token storage
+
+#### 4. Third-party Auth (Auth0, Firebase)
+**Pros**:
+- Feature-rich authentication
+- Built-in security features
+- Easy to implement
+
+**Cons**:
+- Vendor lock-in
+- Monthly costs
+- Less control over user data
 
 ## 📊 Data Models
 
 ### Core Entities
 
-#### Car
+#### User (NEW - Multi-tenancy)
+```typescript
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  hashed_password: string;
+  is_active: boolean;
+  is_admin: boolean;
+  email_verified: boolean;
+  created_at: Date;
+  updated_at: Date;
+  last_login?: Date;
+}
+```
+
+#### Car (UPDATED - Multi-tenancy)
 ```typescript
 interface Car {
   id: string;
+  user_id: string;  // NEW - Multi-tenancy
   year: number;
   make: string;
   model: string;
@@ -29,26 +130,27 @@ interface Car {
   mileage: number;
   color: string;
   engine: string;
-  licensePlate: string;
-  insuranceExpiry: Date;
-  registrationExpiry: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  license_plate: string;
+  insurance_info: string;
+  notes: string;
+  created_at: Date;
+  updated_at: Date;
 }
 ```
 
-#### Issue
+#### Issue (UPDATED - Multi-tenancy)
 ```typescript
 interface Issue {
   id: string;
-  carId: string;
+  user_id: string;  // NEW - Multi-tenancy
+  car_id: string;
   title: string;
   description: string;
   status: 'open' | 'resolved';
   priority: 'low' | 'medium' | 'high';
-  dueDate?: Date;
-  createdAt: Date;
-  resolvedAt?: Date;
+  due_date?: Date;
+  created_at: Date;
+  resolved_at?: Date;
 }
 ```
 
@@ -163,7 +265,7 @@ src/
 - Excellent developer experience
 - No vendor lock-in
 
-### Backend Framework: FastAPI (Planned)
+### Backend Framework: FastAPI ✅ IMPLEMENTED
 **Rationale**:
 - Modern Python web framework
 - Automatic API documentation
@@ -171,13 +273,21 @@ src/
 - Excellent performance
 - Easy to learn and use
 
-### Database: SQLite (Development) + PostgreSQL (Production)
+### Database: SQLite (Development) + PostgreSQL (Production) ✅ DECIDED
 **Rationale**:
 - SQLite for development (simple, file-based, no setup required)
-- PostgreSQL for production (robust, production-ready)
+- PostgreSQL for production (robust, production-ready, recommended for multi-tenancy)
 - SQLAlchemy ORM for type-safe database operations
 - Migration support for schema changes
 - Easy data export/import with CSV files
+
+### Deployment: Linux VPS (Hostinger) ✅ DECIDED
+**Rationale**:
+- User has existing VPS infrastructure
+- Full control over server configuration
+- Cost-effective for small to medium scale
+- Can scale up as needed
+- Familiar environment for user
 
 ### File Storage: Local + Cloud (Planned)
 **Rationale**:
@@ -186,13 +296,21 @@ src/
 - Flexible storage strategy
 - Cost-effective for different use cases
 
-### Data Management: CSV Export/Import System ✅
+### Data Management: CSV Export/Import System ✅ IMPLEMENTED
 **Rationale**:
 - Easy data backup and restoration
 - Efficient testing with sample data
 - Manual data entry via spreadsheet editors
 - Version control for test data
 - Automatic schema adaptation
+
+### Authentication: Simple Session-Based ✅ DECIDED
+**Rationale**:
+- Easy to implement and maintain
+- Full control over authentication flow
+- No external dependencies
+- Works well with VPS deployment
+- Familiar to users
 
 ## 🔌 API Design
 
