@@ -1,0 +1,5 @@
+id,car_id,title,description,status,priority,due_date,created_at,resolved_at
+,1,Oil Change,Change oil and filter every 5000 miles,open,medium,2025-08-15,,
+,1,Tire Rotation,Rotate tires for even wear,open,low,2025-07-30,,
+,2,Brake Inspection,Check brake pads and rotors,open,high,2025-07-20,,
+,3,Annual Service,Complete annual maintenance check,open,high,2025-09-01,, 

@@ -1,0 +1,14 @@
+id,year,make,model,vin,mileage,license_plate,insurance_info,notes,created_at,updated_at
+1,1991,Beck,550 Spyder,,32500,BLAH,Policy #69,This is a really dangerous car.,2025-07-05T03:55:31.814571,2025-07-05T03:55:31.814581
+2,1931,Ford,Model A,,12500,Yadda,Policy #72,This is a really slow car.,2025-07-05T03:55:31.814584,2025-07-05T03:55:31.814585
+3,1932,Ford,Model B Hotrod,,22500,,,This is a really fast car.,2025-07-05T04:06:55.488005,2025-07-05T04:06:55.488015
+4,1939,Ford,Standard Coupe,,24500,,,This is a bitchin car.,2025-07-05T04:08:40.416800,2025-07-05T04:08:40.416809
+5,1964,Chevrolet,Chevelle 2 Door Wagon,,48500,,,Super bitchin fast car.,2025-07-05T04:10:45.568797,2025-07-05T04:10:45.568805
+6,1996,Porsche,911 (993) Turbo,,45500,,,This is another super fast car,2025-07-05T04:12:47.053387,2025-07-05T04:12:47.053398
+7,1998,Ferrari,355 F1 Berlinetta,,43500,,,I love this car!,2025-07-05T04:14:14.585078,2025-07-05T04:14:14.585090
+8,1929,Ford,Roadster Pickup,,24400,,,Old truck.,2025-07-05T04:15:04.563967,2025-07-05T04:15:36.794036
+9,1996,Ford,Ranger Pickup,,175500,,,Old farm truck.,2025-07-05T04:16:37.537993,2025-07-05T04:16:37.538005
+10,2019,Tesla,Model 3 Performance,,71616,,,,2025-07-06T04:28:53.046352,2025-07-06T04:28:53.046360
+11,2021,Ford,Expedition,,67155,,,,2025-07-06T04:30:29.639700,2025-07-06T04:30:29.639706
+12,2021,Ford,F-250 Super Duty,,52535,,,,2025-07-06T04:31:37.674032,2025-07-06T04:31:37.674039
+13,2006,Monaco,Signature,,131231,,,,2025-07-06T04:32:25.778513,2025-07-06T04:32:25.778521

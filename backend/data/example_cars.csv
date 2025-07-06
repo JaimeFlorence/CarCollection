@@ -1,0 +1,4 @@
+id,year,make,model,vin,mileage,license_plate,insurance_info,notes,created_at,updated_at
+,2020,Toyota,Camry,1HGBH41JXMN109186,45000,ABC123,Policy #12345,Well maintained family car,,
+,2018,Honda,Civic,2T1BURHE0JC123456,38000,DEF456,Policy #67890,Great fuel economy,,
+,2022,Ford,Mustang,1FATP8UH0K5123456,12000,GHI789,Policy #11111,Sports car - weekend driver,, 
