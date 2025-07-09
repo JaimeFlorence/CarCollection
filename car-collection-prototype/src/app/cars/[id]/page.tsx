@@ -335,25 +335,47 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
     }
   };
 
-  const handleSaveServiceRecord = async (serviceData: Partial<ServiceHistory>, selectedIntervalIds?: number[]) => {
+  const handleSaveServiceRecord = async (
+    serviceData: Partial<ServiceHistory>, 
+    selectedIntervalIds?: number[],
+    intervalCosts?: Array<{intervalId: number, cost: number}>
+  ) => {
     try {
       if (editingService) {
         // Update existing service
         await apiService.updateServiceHistory(editingService.id, serviceData);
       } else {
-        // Create new service
-        await apiService.createServiceHistory(Number(id), {
-          car_id: Number(id),
-          ...serviceData
-        } as any);
+        // If intervals were selected, create a service history entry for each one
+        if (selectedIntervalIds && selectedIntervalIds.length > 0) {
+          // Get the selected intervals details
+          const selectedIntervals = serviceIntervals.filter(interval => 
+            selectedIntervalIds.includes(interval.id)
+          );
+          
+          // Create a service history entry for each selected interval
+          for (let i = 0; i < selectedIntervals.length; i++) {
+            const interval = selectedIntervals[i];
+            // Find the cost for this specific interval
+            const intervalCost = intervalCosts?.find(ic => ic.intervalId === interval.id)?.cost || 0;
+            
+            await apiService.createServiceHistory(Number(id), {
+              car_id: Number(id),
+              ...serviceData,
+              cost: intervalCost, // Use the specific cost for this interval
+              service_item: interval.service_item // Use the interval's exact name
+            } as any);
+          }
+        } else {
+          // No intervals selected, just create one entry with the user's description
+          await apiService.createServiceHistory(Number(id), {
+            car_id: Number(id),
+            ...serviceData
+          } as any);
+        }
       }
       
-      // If intervals were selected, just trigger a refresh
-      // The ServiceIntervalList will recalculate progress based on the new service history
-      if (selectedIntervalIds && selectedIntervalIds.length > 0) {
-        // Trigger refresh in ServiceIntervalList
-        setServiceRefreshTrigger(prev => prev + 1);
-      }
+      // Trigger refresh in ServiceIntervalList
+      setServiceRefreshTrigger(prev => prev + 1);
       
       // Refresh service history
       const updatedHistory = await apiService.getServiceHistory(Number(id));

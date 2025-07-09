@@ -25,10 +25,19 @@
   - [x] Smart vehicle detection for engine variants
   - [x] Confidence scoring based on data source
 
-### ✅ Recently Fixed Issues
+### ✅ Recently Fixed Issues (January 9, 2025)
 - [x] **Date Display Bug** ✅ FIXED
   - [x] "Done today" now displays correctly
   - [x] Timezone/date precision issue resolved
+- [x] **Service History Integration Issues** ✅ FIXED
+  - [x] Removed duplicate ServiceEntryDialog components
+  - [x] Fixed undefined function references
+  - [x] Corrected API endpoint mismatches
+  - [x] Fixed TypeScript type errors
+- [x] **Cost Double-Counting Bug** ✅ FIXED
+  - [x] Implemented individual cost entry for each service item
+  - [x] Invoice total can differ from sum of items
+  - [x] Each service interval tracks its own cost
 
 ### 🟢 High Priority (User Priority #1) - COMPLETED
 - [x] **Multi-Tenancy Implementation** ✅ (Completed: July 7, 2024)
@@ -55,55 +64,71 @@
 
 ### 📋 Pending Tasks
 
-#### 🔴 Immediate Priority - Service History System (Phase 1)
-1. **Step 1: Database Schema Updates** 🚀 NEXT
-   - [ ] Add `shop` field to ServiceHistory model
-   - [ ] Add `invoice_number` field
-   - [ ] Create migration script
-   - [ ] Test existing functionality still works
+#### ✅ COMPLETED - Service History System (Phase 1) - January 9, 2025
+1. **Step 1: Database Schema Updates** ✅
+   - [x] `shop` field already in ServiceHistory model
+   - [x] `invoice_number` field already in model
+   - [x] Backend API endpoints implemented
+   - [x] All functionality working
 
-2. **Step 2: Basic Service History Tab**
-   - [ ] Create ServiceHistoryTable component
-   - [ ] Display existing service records
-   - [ ] Implement date/mileage/shop/summary/cost columns
-   - [ ] Add to Service History tab (read-only)
+2. **Step 2: Basic Service History Tab** ✅
+   - [x] ServiceHistoryTable component created
+   - [x] Displays service records grouped by date
+   - [x] Date/mileage/shop/summary/cost columns implemented
+   - [x] Added to Service History tab with full functionality
 
-3. **Step 3: Service Entry Dialog**
-   - [ ] Create ServiceEntryDialog component
-   - [ ] Add "Add Service" button to Service History tab
-   - [ ] Implement form with date/mileage/shop/cost fields
-   - [ ] Connect to create service history API
+3. **Step 3: Service Entry Dialog** ✅
+   - [x] ServiceEntryDialog component created
+   - [x] "Add Service" button in Service History tab
+   - [x] Full form with all fields implemented
+   - [x] Connected to service history API
 
-4. **Step 4: Service Schedule Integration**
-   - [ ] Add checkboxes to ServiceIntervalList
-   - [ ] Add "Record Service" button
-   - [ ] Pass selected items to ServiceEntryDialog
-   - [ ] Update service intervals when service recorded
+4. **Step 4: Service Schedule Integration** ✅
+   - [x] Checkboxes in ServiceEntryDialog for intervals
+   - [x] "Mark Done" button in ServiceIntervalList
+   - [x] Individual cost entry for each service item
+   - [x] Automatic progress update when service recorded
 
-5. **Step 5: Edit/Delete Functionality**
-   - [ ] Make table rows clickable
-   - [ ] Open dialog with existing data
-   - [ ] Implement update API endpoint
-   - [ ] Add delete confirmation
+5. **Step 5: Edit/Delete Functionality** ✅
+   - [x] Edit buttons on service history items
+   - [x] Delete buttons with confirmation dialog
+   - [x] Update API endpoint working
+   - [x] Full CRUD operations supported
 
-6. **Step 6: Grouping & Summary**
-   - [ ] Group services by date in table
-   - [ ] Calculate summary statistics
-   - [ ] Add filter/sort controls
+6. **Step 6: Grouping & Summary** ✅
+   - [x] Services grouped by date in table
+   - [x] Summary statistics (total cost, average, etc.)
+   - [x] Sort by date/mileage/cost implemented
 
-#### High Priority (After Service History Phase 1)
-1. **Testing & Quality**
-   - [x] Fix date display bug in service history ✅ FIXED
-   - [ ] Comprehensive test coverage for new features
-   - [ ] E2E tests for service interval flows
-   - [ ] Performance optimization
+#### 🔴 Immediate Priority - Enhanced Cost Tracking
+1. **Parts/Labor/Tax Breakdown** 🚀 NEXT
+   - [ ] Add parts_cost, labor_cost, tax fields to ServiceHistory model
+   - [ ] Update ServiceHistoryCreate/Update schemas
+   - [ ] Modify ServiceEntryDialog to show breakdown fields
+   - [ ] Add validation that parts + labor + tax = total
+   - [ ] Update ServiceHistoryTable to show breakdown
 
-2. **User Experience Enhancements**
-   - [ ] Dashboard with upcoming services
-   - [ ] Email notifications for due services
-   - [ ] Mobile responsive design improvements
-   - [ ] Print service schedules
-   - [ ] Service history report/export
+#### High Priority - Next Features
+1. **Service History Enhancements**
+   - [ ] Export service history to CSV/PDF
+   - [ ] Attach photos/receipts to service records
+   - [ ] Service provider directory/autocomplete
+   - [ ] Recurring service templates
+   - [ ] Quick filters (by shop, date range, service type)
+
+2. **Analytics & Reporting**
+   - [ ] Cost analytics dashboard
+   - [ ] Cost per mile calculations
+   - [ ] Service frequency trends
+   - [ ] Predictive maintenance alerts
+   - [ ] Compare costs across vehicles
+
+3. **User Experience Enhancements**
+   - [ ] Dashboard with upcoming services widget
+   - [ ] Email/SMS notifications for due services
+   - [ ] Mobile responsive improvements
+   - [ ] Print-friendly service reports
+   - [ ] Bulk service entry for fleet
 
 #### Medium Priority
 3. **Advanced Service Features**
@@ -252,21 +277,23 @@
 
 ---
 
-## 📂 Key Files for Next Session
+## 📂 Key Files Modified Today (January 9, 2025)
 
 ### Frontend Components
-- `/src/components/ServiceIntervalList.tsx` - Date bug fixed
-- `/src/components/EngineTypeDialog.tsx` - New engine selection
-- `/src/app/cars/[id]/page.tsx` - Main car details page
+- `/src/components/ServiceIntervalList.tsx` - Progress calculation from service history
+- `/src/components/ServiceEntryDialog.tsx` - Individual cost entry per service item
+- `/src/components/ServiceHistoryTable.tsx` - Grouping, sorting, summary stats
+- `/src/app/cars/[id]/page.tsx` - Fixed integration issues, cost handling
 
 ### Backend Services
-- `/backend/app/service_research.py` - Enhanced with engine types
-- `/backend/app/service_api.py` - Service interval endpoints
-- `/backend/app/models.py` - Database models
+- `/backend/app/service_api.py` - Service history endpoints (already implemented)
+- `/backend/app/models.py` - ServiceHistory model with shop, invoice fields
+- `/backend/app/schemas.py` - ServiceHistory schemas
 
-### Configuration
-- `/car-collection-prototype/CLAUDE.md` - AI assistant instructions
-- Database: Fresh with sample cars, no service intervals
+### Scripts & Configuration
+- `/car-collection-prototype/reset_and_setup.py` - Enhanced with prerequisites check, backup
+- `/car-collection-prototype/import_data_sqlite.py` - Service intervals generation disabled
+- Database: Clean with cars/todos only, no service intervals
 
 ---
 

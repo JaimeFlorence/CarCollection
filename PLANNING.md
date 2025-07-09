@@ -68,11 +68,18 @@
    - Edit/Delete/Add intervals
    - Engine type selection dialog
 
-4. **Engine Type Handling** (NEW)
+4. **Engine Type Handling**
    - Smart detection for vehicles with engine variants
    - Modal dialog for user selection
    - Diesel-specific intervals (DEF, fuel filters, EGR)
    - Different oil specifications and capacities
+
+5. **Service History Integration** ✅ (January 9, 2025)
+   - Service Entry Dialog with individual cost tracking
+   - Service Schedule checkboxes link to service history
+   - Automatic progress reset when services are recorded
+   - Individual cost entry for each service item
+   - Support for invoice totals that don't match item sum
 
 ### Technical Implementation
 
@@ -100,8 +107,11 @@
 4. Update status: ok (0-74%), due_soon (75-99%), overdue (100%+)
 ```
 
-### Recently Fixed
+### Recently Fixed (January 9, 2025)
 - Date display bug: FIXED - "Done today" now displays correctly
+- Service History integration: FIXED - Removed duplicate dialogs, fixed API calls
+- Cost double-counting: FIXED - Individual cost entry per service item
+- Service progress reset: FIXED - Correctly updates when services recorded
 
 ## 📦 Technology Stack
 
@@ -169,7 +179,9 @@ todos: id, user_id, car_id, title, description, priority, status
 
 ### Phase 1: Core Improvements
 - [x] Fix date display bug ✅ FIXED
-- [ ] Add mileage update when marking service done
+- [x] Service History with individual cost tracking ✅ IMPLEMENTED
+- [x] Service Schedule integration ✅ IMPLEMENTED
+- [ ] Parts/Labor/Tax breakdown for service costs
 - [ ] Service history export (CSV/PDF)
 - [ ] Email notifications for due services
 - [ ] Mobile app improvements
@@ -236,59 +248,61 @@ npm run dev
 - `service_api.py` - Engine type parameter
 - Database reset with clean data
 
-## 📋 Service History System (Planned - January 2025)
+## 📋 Service History System ✅ IMPLEMENTED (January 9, 2025)
 
 ### Overview
 Comprehensive service record tracking system that integrates with Service Schedule for streamlined maintenance management.
 
-### Core Features Design
+### Core Features Implemented
 
-#### 1. Service History Table View
+#### 1. Service History Table View ✅
 **Layout:** Table with columns: Date | Mileage | Shop | Summary | Cost
 **Functionality:**
-- Group multiple service items by date into single record
+- Groups multiple service items by date into single record
 - Sort by date, shop, or cost
-- Filter by date range, shop, cost range
-- Summary stats: Total services, total cost, average cost
+- Shows edit/delete buttons for each service item
+- Summary stats: Total services, total cost, average cost, days since last service
 
-#### 2. Service Entry Dialog
-**Unified Add/Edit Interface:**
+#### 2. Service Entry Dialog ✅
+**Features Implemented:**
 - Date, mileage, shop, invoice # fields
 - Service Schedule integration with checkboxes
-- Multiple service items per date
-- Cost entry updates Service Schedule estimates
-- Notes and attachments support
+- Individual cost entry for each selected service item
+- Shows sum of service items vs invoice total
+- Creates separate history entry for each checked interval
+- Notes field for additional information
 
-#### 3. Service Schedule Integration
-**Workflow:**
-1. User selects items in Service Schedule (checkboxes)
-2. Clicks "Record Service" button
-3. Dialog opens with selected items pre-checked
-4. User adds costs, shop info, notes
-5. Save updates both Service History and Schedule progress
+#### 3. Service Schedule Integration ✅
+**Current Workflow:**
+1. User can click "Mark Done" on any service interval
+2. Dialog opens with that interval pre-selected
+3. User can check additional intervals that were serviced
+4. Each interval gets its own cost input field
+5. System creates individual service history entries
+6. Progress bars automatically update based on service date/mileage
 
-### Implementation Phases
+### Next Features to Implement
 
-#### Phase 1: Core Functionality
-1. **Step 1:** Database schema updates (add shop, invoice_number)
-2. **Step 2:** Basic Service History tab (read-only table)
-3. **Step 3:** Service entry dialog (manual entry)
-4. **Step 4:** Service Schedule integration
-5. **Step 5:** Edit/delete functionality
-6. **Step 6:** Date grouping and summary stats
+#### Enhanced Cost Tracking (Discussed)
+**Parts/Labor/Tax Breakdown:**
+- Add optional fields for parts cost, labor cost, and taxes
+- These should sum to the total cost
+- Allows detailed cost analysis
+- Track labor vs parts ratio over time
 
-#### Phase 2: Analytics & Documentation
-- Cost analysis dashboard
-- Cost vs mileage trends
-- Document storage (photos, PDFs)
-- Anonymous data collection for trends
+#### Service History Enhancements
+- Export service history to CSV/PDF
+- Attach photos/receipts to service records
+- Service provider/shop management
+- Recurring service reminders
+- Cost prediction based on history
 
-#### Phase 3: Advanced Features (Future)
-- SMS/Telegram receipt upload
-- OCR for automatic data extraction
-- Calendar integration
-- Parts tracking
-- Fleet dashboard
+#### Analytics Dashboard
+- Cost trends over time
+- Cost per mile calculations
+- Upcoming service predictions
+- Compare costs across vehicles
+- Service frequency analysis
 
 ### Technical Architecture
 

@@ -1,41 +1,50 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ServiceHistory } from '@/lib/api';
+import { ServiceHistory, ServiceInterval, apiService } from '@/lib/api';
 import { format } from 'date-fns';
 
 interface ServiceEntryDialogProps {
   carId: number;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (serviceData: Partial<ServiceHistory>) => Promise<void>;
+  onSave: (serviceData: Partial<ServiceHistory>, selectedIntervalIds?: number[], intervalCosts?: Array<{intervalId: number, cost: number}>) => Promise<void>;
   existingService?: ServiceHistory;
+  preselectedInterval?: ServiceInterval | null;
 }
 
 export default function ServiceEntryDialog({
-  carId: _carId, // Not currently used but might be needed for future features
+  carId,
   isOpen,
   onClose,
   onSave,
-  existingService
+  existingService,
+  preselectedInterval
 }: ServiceEntryDialogProps) {
   const [formData, setFormData] = useState({
     performed_date: existingService?.performed_date 
       ? format(new Date(existingService.performed_date), 'yyyy-MM-dd')
       : format(new Date(), 'yyyy-MM-dd'),
-    mileage: existingService?.mileage || '',
+    mileage: existingService?.mileage?.toString() || '',
     shop: existingService?.shop || '',
     invoice_number: existingService?.invoice_number || '',
     service_item: existingService?.service_item || '',
-    cost: existingService?.cost || '',
+    cost: existingService?.cost?.toString() || '',
     notes: existingService?.notes || ''
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [serviceIntervals, setServiceIntervals] = useState<ServiceInterval[]>([]);
+  const [selectedIntervals, setSelectedIntervals] = useState<number[]>([]);
+  const [intervalCosts, setIntervalCosts] = useState<Record<number, string>>({});
+  const [loadingIntervals, setLoadingIntervals] = useState(false);
 
   // Update form data when existingService changes or dialog opens
   useEffect(() => {
     if (isOpen) {
+      // If we have a preselected interval and no existing service, pre-populate from the interval
+      const shouldUseInterval = preselectedInterval && !existingService;
+      
       setFormData({
         performed_date: existingService?.performed_date 
           ? format(new Date(existingService.performed_date), 'yyyy-MM-dd')
@@ -43,13 +52,34 @@ export default function ServiceEntryDialog({
         mileage: existingService?.mileage?.toString() || '',
         shop: existingService?.shop || '',
         invoice_number: existingService?.invoice_number || '',
-        service_item: existingService?.service_item || '',
-        cost: existingService?.cost?.toString() || '',
+        service_item: existingService?.service_item || (shouldUseInterval ? preselectedInterval.service_item : ''),
+        cost: existingService?.cost?.toString() || (shouldUseInterval 
+          ? (((preselectedInterval.cost_estimate_low || 0) + (preselectedInterval.cost_estimate_high || 0)) / 2).toString()
+          : ''),
         notes: existingService?.notes || ''
       });
       setErrors({});
+      
+      // If we have a preselected interval, mark it as selected
+      setSelectedIntervals(preselectedInterval && !existingService ? [preselectedInterval.id] : []);
+      setIntervalCosts({}); // Reset interval costs
+      
+      // Load service intervals for this car
+      loadServiceIntervals();
     }
-  }, [isOpen, existingService]);
+  }, [isOpen, existingService, preselectedInterval]);
+
+  const loadServiceIntervals = async () => {
+    setLoadingIntervals(true);
+    try {
+      const intervals = await apiService.getServiceIntervals(carId);
+      setServiceIntervals(intervals);
+    } catch (error) {
+      console.error('Failed to load service intervals:', error);
+    } finally {
+      setLoadingIntervals(false);
+    }
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -93,7 +123,13 @@ export default function ServiceEntryDialog({
         notes: formData.notes.trim() || undefined
       };
       
-      await onSave(serviceData);
+      // Pass the interval costs along with the selected intervals
+      const intervalCostData = selectedIntervals.map(id => ({
+        intervalId: id,
+        cost: parseFloat(intervalCosts[id] || '0')
+      }));
+      
+      await onSave(serviceData, selectedIntervals, intervalCostData);
       onClose();
     } catch (error) {
       console.error('Failed to save service:', error);
@@ -109,6 +145,39 @@ export default function ServiceEntryDialog({
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  const handleIntervalToggle = (intervalId: number) => {
+    setSelectedIntervals(prev => {
+      const newSelected = prev.includes(intervalId) 
+        ? prev.filter(id => id !== intervalId)
+        : [...prev, intervalId];
+      
+      // If unchecking, remove the cost
+      if (!newSelected.includes(intervalId)) {
+        setIntervalCosts(prev => {
+          const newCosts = { ...prev };
+          delete newCosts[intervalId];
+          return newCosts;
+        });
+      }
+      
+      return newSelected;
+    });
+  };
+
+  const handleIntervalCostChange = (intervalId: number, cost: string) => {
+    setIntervalCosts(prev => ({
+      ...prev,
+      [intervalId]: cost
+    }));
+  };
+
+  // Calculate the sum of individual interval costs
+  const calculateIntervalCostsSum = () => {
+    return Object.entries(intervalCosts)
+      .filter(([id]) => selectedIntervals.includes(Number(id)))
+      .reduce((sum, [_, cost]) => sum + (parseFloat(cost) || 0), 0);
   };
 
   if (!isOpen) return null;
@@ -267,6 +336,85 @@ export default function ServiceEntryDialog({
               />
             </div>
           </div>
+
+          {/* Service Schedule Items */}
+          {serviceIntervals.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-slate-900">Service Schedule Items</h3>
+              <p className="text-sm text-slate-600">
+                Select any scheduled services that were completed during this visit:
+              </p>
+              
+              {loadingIntervals ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-60 overflow-y-auto border border-slate-200 rounded-lg p-4">
+                  {serviceIntervals.map((interval) => (
+                    <div
+                      key={interval.id}
+                      className={`p-3 rounded-lg transition-colors ${
+                        selectedIntervals.includes(interval.id) ? 'bg-blue-50 border border-blue-200' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedIntervals.includes(interval.id)}
+                          onChange={() => handleIntervalToggle(interval.id)}
+                          className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-900">{interval.service_item}</div>
+                          <div className="text-sm text-slate-600">
+                            Every {interval.interval_miles?.toLocaleString()} miles or {interval.interval_months} months
+                          </div>
+                          {(interval.cost_estimate_low || interval.cost_estimate_high) && (
+                            <div className="text-sm text-slate-500">
+                              Est. cost: ${interval.cost_estimate_low} - ${interval.cost_estimate_high}
+                            </div>
+                          )}
+                        </div>
+                      </label>
+                      {selectedIntervals.includes(interval.id) && (
+                        <div className="mt-3 ml-7">
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Cost for this service
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={intervalCosts[interval.id] || ''}
+                              onChange={(e) => handleIntervalCostChange(interval.id, e.target.value)}
+                              placeholder="0.00"
+                              className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {selectedIntervals.length > 0 && (
+                  <div className="mt-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600">Sum of service items:</span>
+                      <span className="font-medium">${calculateIntervalCostsSum().toFixed(2)}</span>
+                    </div>
+                    {formData.cost && (
+                      <div className="flex justify-between text-sm mt-1">
+                        <span className="text-slate-600">Invoice total:</span>
+                        <span className="font-medium">${parseFloat(formData.cost).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              )}
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-6 border-t border-slate-200">
