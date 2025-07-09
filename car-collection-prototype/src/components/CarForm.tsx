@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Car, CarCreate } from '@/lib/api';
+import { Car, CarCreate, apiService } from '@/lib/api';
 
 interface CarFormProps {
   car?: Car;
@@ -19,9 +19,14 @@ export default function CarForm({ car, onSubmit, onCancel, loading = false }: Ca
     license_plate: '',
     insurance_info: '',
     notes: '',
+    group_name: 'Daily Drivers',
   });
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
+  const [showNewGroupInput, setShowNewGroupInput] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
 
   useEffect(() => {
+    loadGroups();
     if (car) {
       setFormData({
         make: car.make,
@@ -31,21 +36,50 @@ export default function CarForm({ car, onSubmit, onCancel, loading = false }: Ca
         license_plate: car.license_plate || '',
         insurance_info: car.insurance_info || '',
         notes: car.notes || '',
+        group_name: car.group_name || 'Daily Drivers',
       });
     }
   }, [car]);
+
+  const loadGroups = async () => {
+    try {
+      const groups = await apiService.getCarGroups();
+      setAvailableGroups(groups);
+    } catch (error) {
+      console.error('Failed to load groups:', error);
+      setAvailableGroups(['Daily Drivers', 'Collector Cars']);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: name === 'year' || name === 'mileage' ? parseInt(value) || 0 : value,
     }));
+  };
+
+  const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === 'new') {
+      setShowNewGroupInput(true);
+    } else {
+      setFormData(prev => ({ ...prev, group_name: value }));
+      setShowNewGroupInput(false);
+    }
+  };
+
+  const handleNewGroupSubmit = () => {
+    if (newGroupName.trim()) {
+      setFormData(prev => ({ ...prev, group_name: newGroupName.trim() }));
+      setShowNewGroupInput(false);
+      setNewGroupName('');
+    }
   };
 
   return (
@@ -146,6 +180,49 @@ export default function CarForm({ car, onSubmit, onCancel, loading = false }: Ca
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., Policy #12345"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Group
+            </label>
+            {showNewGroupInput ? (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  placeholder="Enter new group name"
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleNewGroupSubmit}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowNewGroupInput(false); setNewGroupName(''); }}
+                  className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <select
+                name="group_name"
+                value={formData.group_name}
+                onChange={handleGroupChange}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {availableGroups.map(group => (
+                  <option key={group} value={group}>{group}</option>
+                ))}
+                <option value="new">+ Create New Group</option>
+              </select>
+            )}
           </div>
 
           <div>

@@ -28,6 +28,7 @@ def create_tables():
                 license_plate VARCHAR(20),
                 insurance_info TEXT,
                 notes TEXT,
+                group_name VARCHAR(100) DEFAULT 'Daily Drivers',
                 created_at DATETIME,
                 updated_at DATETIME,
                 FOREIGN KEY (user_id) REFERENCES users (id)
@@ -101,10 +102,24 @@ def import_cars(user_id):
                 if not row.get('make') or not row.get('model'):
                     continue
                 
+                # Determine group name based on car characteristics
+                group_name = 'Daily Drivers'  # Default
+                if row.get('group_name') and row['group_name'].strip():
+                    group_name = row['group_name'].strip()
+                else:
+                    # Auto-assign based on car characteristics (year, make, etc.)
+                    year = int(row['year']) if row['year'] and row['year'].strip() else 0
+                    make = row['make'].lower() if row['make'] else ''
+                    
+                    # Classic/collector cars (older than 1990 or luxury brands)
+                    luxury_brands = ['porsche', 'ferrari', 'lamborghini', 'aston martin', 'bentley', 'rolls-royce', 'mclaren']
+                    if year < 1990 or any(brand in make for brand in luxury_brands):
+                        group_name = 'Collector Cars'
+                
                 # Insert car
                 cursor.execute("""
-                    INSERT INTO cars (user_id, make, model, year, mileage, license_plate, insurance_info, notes, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO cars (user_id, make, model, year, mileage, license_plate, insurance_info, notes, group_name, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     user_id,
                     row['make'],
@@ -114,6 +129,7 @@ def import_cars(user_id):
                     row['license_plate'] if row['license_plate'] and row['license_plate'].strip() else None,
                     row['insurance_info'] if row['insurance_info'] and row['insurance_info'].strip() else None,
                     row['notes'] if row['notes'] and row['notes'].strip() else None,
+                    group_name,
                     datetime.utcnow().isoformat(),
                     datetime.utcnow().isoformat()
                 ))
@@ -230,16 +246,29 @@ def verify_import():
         todo_count = cursor.fetchone()[0]
         print(f"✅ Todos in database: {todo_count}")
         
-        # Show sample cars
+        # Show sample cars with groups
         cursor.execute("""
-            SELECT make, model, year, mileage FROM cars 
+            SELECT make, model, year, mileage, group_name FROM cars 
             WHERE user_id = (SELECT id FROM users WHERE username = 'jaime')
             LIMIT 5
         """)
         cars = cursor.fetchall()
         print("\n📋 Sample cars:")
         for i, car in enumerate(cars, 1):
-            print(f"  {i}. {car[2]} {car[0]} {car[1]} ({car[3]:,} miles)")
+            group_name = car[4] or 'Daily Drivers'
+            print(f"  {i}. {car[2]} {car[0]} {car[1]} ({car[3]:,} miles) - {group_name}")
+            
+        # Show group distribution
+        cursor.execute("""
+            SELECT group_name, COUNT(*) FROM cars 
+            WHERE user_id = (SELECT id FROM users WHERE username = 'jaime')
+            GROUP BY group_name
+        """)
+        groups = cursor.fetchall()
+        print("\n📊 Cars by group:")
+        for group_name, count in groups:
+            group_display = group_name or 'Daily Drivers'
+            print(f"  {group_display}: {count} cars")
         
         return car_count > 0 and todo_count > 0
         

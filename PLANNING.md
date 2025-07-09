@@ -8,468 +8,235 @@
 │   Frontend      │    │    Backend      │    │   External      │
 │   (Next.js)     │◄──►│   (FastAPI)     │◄──►│   Services      │
 │                 │    │                 │    │                 │
-│ • Dashboard     │    │ • REST API      │    │ • Email Service │
-│ • Car Details   │    │ • Database      │    │ • File Storage  │
-│ • Mobile PWA    │    │ • Auth System   │    │ • SMS (Future)  │
+│ • Dashboard     │    │ • REST API      │    │ • Research API  │
+│ • Car Details   │    │ • Database      │    │ • Email Service │
+│ • Service Mgmt  │    │ • Auth System   │    │ • VIN Decoder   │
+│ • Mobile PWA    │    │ • Research Eng. │    │ • File Storage  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 🔐 Multi-Tenancy & Authentication
+## 🔐 Multi-Tenancy & Authentication ✅ IMPLEMENTED
 
-### Multi-Tenancy Architecture ✅ DECIDED
-**Status**: High Priority - Implementation planned
+### Multi-Tenancy Architecture 
+**Status**: COMPLETED (July 7, 2024)
 **Approach**: Database-level tenant isolation with user_id foreign keys
-**Benefits**: 
+**Implementation**: 
 - Each user has their own isolated car collection
-- Secure data separation
-- Scalable architecture
-- Easy to implement now vs. later
+- All queries filtered by authenticated user
+- Secure data separation at database level
+- Service intervals and history are user-specific
 
-### Authentication System ✅ DECIDED
-**Status**: Simple username/password with session tokens (preferred)
+### Authentication System
+**Status**: IMPLEMENTED - Simple username/password with JWT tokens
 **Features**:
-- Admin user creation for others
-- Email invitations for new users
-- Session-based authentication
+- User registration and login
 - Password hashing with bcrypt
 - JWT tokens for API access
+- Protected routes and endpoints
+- Session persistence with localStorage
 
-### User Management ✅ DECIDED
-**Status**: Hybrid approach - Admin creation + Email invitations
-**Features**:
-- Admins can create accounts for others
-- Email invitations sent to new users
-- User activation via email link
-- Role-based access control (Admin/User)
+### User Management
+**Status**: Partially implemented
+**Completed**:
+- Admin user creation
+- User registration flow
+- Role-based access (Admin/User)
 
-### Authentication Methods Summary
+**Pending**:
+- Email invitations
+- Password reset functionality
+- Email verification
 
-#### 1. Simple (Username/Password + Session) ✅ CHOSEN
-**Pros**:
-- Easy to implement and maintain
-- Familiar to users
-- Full control over authentication flow
-- No external dependencies
-- Works offline
+## 🛠️ Service Intervals System ✅ ENHANCED (January 9, 2025)
 
-**Cons**:
-- Users need to remember another password
-- Need to handle password reset flows
-- Security depends on password strength
+### Core Features Implemented
+1. **Database Models**
+   - ServiceInterval: Stores maintenance schedules
+   - ServiceHistory: Tracks completed services
+   - ServiceResearchLog: Audit trail for research
 
-**Implementation**:
-- FastAPI with session middleware
-- bcrypt for password hashing
-- JWT tokens for API authentication
-- Email verification for new accounts
+2. **Research Engine**
+   - Real manufacturer data for 15+ brands
+   - Engine type support (gas/diesel/hybrid)
+   - Confidence scoring system
+   - Default intervals for unknown vehicles
 
-#### 2. OAuth (GitHub, Google, etc.)
-**Pros**:
-- No password management
-- Users trust familiar providers
-- Enhanced security
-- Quick sign-up process
+3. **User Interface**
+   - Service Schedule tab with progress visualization
+   - Real-time progress bars based on service history
+   - "Mark Done" functionality
+   - Edit/Delete/Add intervals
+   - Engine type selection dialog
 
-**Cons**:
-- External dependency on OAuth providers
-- More complex implementation
-- Requires app registration with providers
-- Potential privacy concerns
+4. **Engine Type Handling** (NEW)
+   - Smart detection for vehicles with engine variants
+   - Modal dialog for user selection
+   - Diesel-specific intervals (DEF, fuel filters, EGR)
+   - Different oil specifications and capacities
 
-#### 3. JWT-Only Authentication
-**Pros**:
-- Stateless authentication
-- Good for microservices
-- No server-side session storage
+### Technical Implementation
 
-**Cons**:
-- More complex token management
-- Harder to implement logout
-- Security considerations with token storage
-
-#### 4. Third-party Auth (Auth0, Firebase)
-**Pros**:
-- Feature-rich authentication
-- Built-in security features
-- Easy to implement
-
-**Cons**:
-- Vendor lock-in
-- Monthly costs
-- Less control over user data
-
-## 📊 Data Models
-
-### Core Entities
-
-#### User (NEW - Multi-tenancy)
-```typescript
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  hashed_password: string;
-  is_active: boolean;
-  is_admin: boolean;
-  email_verified: boolean;
-  created_at: Date;
-  updated_at: Date;
-  last_login?: Date;
-}
+#### Backend Architecture
+```python
+# Service Research Flow
+1. User clicks "Research Intervals"
+2. Frontend checks if engine type needed
+3. If yes, shows EngineTypeDialog
+4. API call: POST /api/cars/{id}/research-intervals?engine_type=diesel
+5. Backend queries manufacturer database
+6. Returns engine-specific intervals
+7. User reviews and saves intervals
 ```
 
-#### Car (UPDATED - Multi-tenancy)
-```typescript
-interface Car {
-  id: string;
-  user_id: string;  // NEW - Multi-tenancy
-  year: number;
-  make: string;
-  model: string;
-  vin: string;
-  mileage: number;
-  color: string;
-  engine: string;
-  license_plate: string;
-  insurance_info: string;
-  notes: string;
-  created_at: Date;
-  updated_at: Date;
-}
+#### Progress Calculation
+```javascript
+// Real-time progress based on service history
+1. Load service history from API
+2. Find most recent service for each interval
+3. Calculate progress:
+   - By miles: (current_miles - service_miles) / interval_miles
+   - By time: (current_date - service_date) / interval_months
+   - Use higher of the two values
+4. Update status: ok (0-74%), due_soon (75-99%), overdue (100%+)
 ```
 
-#### Issue (UPDATED - Multi-tenancy)
-```typescript
-interface Issue {
-  id: string;
-  user_id: string;  // NEW - Multi-tenancy
-  car_id: string;
-  title: string;
-  description: string;
-  status: 'open' | 'resolved';
-  priority: 'low' | 'medium' | 'high';
-  due_date?: Date;
-  created_at: Date;
-  resolved_at?: Date;
-}
-```
+### Recently Fixed
+- Date display bug: FIXED - "Done today" now displays correctly
 
-#### MaintenanceEvent
-```typescript
-interface MaintenanceEvent {
-  id: string;
-  carId: string;
-  type: 'oil_change' | 'annual_service' | 'major_service' | 'custom';
-  title: string;
-  description: string;
-  date: Date;
-  mileage: number;
-  cost?: number;
-  nextDueDate?: Date;
-  nextDueMileage?: number;
-  intervalMonths?: number;
-  intervalMiles?: number;
-}
-```
-
-#### FuelEntry
-```typescript
-interface FuelEntry {
-  id: string;
-  carId: string;
-  date: Date;
-  gallons: number;
-  mileage: number;
-  cost?: number;
-  notes?: string;
-  mpg?: number;
-}
-```
-
-#### Trip
-```typescript
-interface Trip {
-  id: string;
-  carId: string;
-  name: string;
-  startDate: Date;
-  endDate: Date;
-  startMileage: number;
-  endMileage: number;
-  destination: string;
-  route: string;
-  notes: string;
-  photos: string[];
-  totalCost?: number;
-}
-```
-
-#### Document
-```typescript
-interface Document {
-  id: string;
-  carId?: string;
-  type: 'photo' | 'receipt' | 'insurance' | 'registration' | 'other';
-  filename: string;
-  originalName: string;
-  mimeType: string;
-  size: number;
-  path: string;
-  uploadedAt: Date;
-  description?: string;
-}
-```
-
-## 🎨 UI/UX Design Principles
-
-### Design System
-- **Color Palette**: Automotive-inspired (deep blues, metallic grays, accent colors)
-- **Typography**: Clean, readable fonts with proper hierarchy
-- **Layout**: Card-based design with smooth animations
-- **Responsive**: Mobile-first approach
-
-### Component Architecture
-```
-src/
-├── components/
-│   ├── ui/                    # Shadcn/ui components
-│   ├── layout/               # Layout components
-│   ├── car/                  # Car-specific components
-│   ├── maintenance/          # Maintenance components
-│   ├── fuel/                 # Fuel tracking components
-│   └── trips/                # Trip journal components
-```
-
-### Page Structure
-- **Dashboard**: Overview of all cars with quick stats
-- **Car Detail**: Tabbed interface for each car's information
-- **Add/Edit Car**: Form for car information
-- **Maintenance Calendar**: Visual timeline of service needs
-- **Reports**: Analytics and insights
-
-## 🔧 Technical Decisions
-
-### Frontend Framework: Next.js 15
-**Rationale**: 
-- Modern React framework with excellent developer experience
-- Built-in TypeScript support
-- App Router for better routing and layouts
-- Server-side rendering capabilities
-- Excellent performance and SEO
-
-### UI Library: Shadcn/ui + Tailwind CSS
-**Rationale**:
-- Modern, accessible components
-- Highly customizable
-- Consistent design system
-- Excellent developer experience
-- No vendor lock-in
-
-### Backend Framework: FastAPI ✅ IMPLEMENTED
-**Rationale**:
-- Modern Python web framework
-- Automatic API documentation
-- Type hints and validation
-- Excellent performance
-- Easy to learn and use
-
-### Database: SQLite (Development) + PostgreSQL (Production) ✅ DECIDED
-**Rationale**:
-- SQLite for development (simple, file-based, no setup required)
-- PostgreSQL for production (robust, production-ready, recommended for multi-tenancy)
-- SQLAlchemy ORM for type-safe database operations
-- Migration support for schema changes
-- Easy data export/import with CSV files
-
-### Deployment: Linux VPS (Hostinger) ✅ DECIDED
-**Rationale**:
-- User has existing VPS infrastructure
-- Full control over server configuration
-- Cost-effective for small to medium scale
-- Can scale up as needed
-- Familiar environment for user
-
-### File Storage: Local + Cloud (Planned)
-**Rationale**:
-- Local storage for development
-- Cloud storage (AWS S3) for production
-- Flexible storage strategy
-- Cost-effective for different use cases
-
-### Data Management: CSV Export/Import System ✅ IMPLEMENTED
-**Rationale**:
-- Easy data backup and restoration
-- Efficient testing with sample data
-- Manual data entry via spreadsheet editors
-- Version control for test data
-- Automatic schema adaptation
-
-### Authentication: Simple Session-Based ✅ DECIDED
-**Rationale**:
-- Easy to implement and maintain
-- Full control over authentication flow
-- No external dependencies
-- Works well with VPS deployment
-- Familiar to users
-
-## 🔌 API Design
-
-### RESTful Endpoints
-```
-GET    /api/cars              # List all cars
-POST   /api/cars              # Create new car
-GET    /api/cars/{id}         # Get car details
-PUT    /api/cars/{id}         # Update car
-DELETE /api/cars/{id}         # Delete car
-
-GET    /api/cars/{id}/issues  # Get car issues
-POST   /api/cars/{id}/issues  # Create issue
-PUT    /api/issues/{id}       # Update issue
-
-GET    /api/cars/{id}/maintenance  # Get maintenance history
-POST   /api/cars/{id}/maintenance  # Log maintenance
-
-GET    /api/cars/{id}/fuel    # Get fuel entries
-POST   /api/cars/{id}/fuel    # Log fuel entry
-
-GET    /api/cars/{id}/trips   # Get trips
-POST   /api/cars/{id}/trips   # Create trip
-
-GET    /api/cars/{id}/photos  # Get photos
-POST   /api/cars/{id}/photos  # Upload photo
-```
-
-### Authentication & Authorization
-- JWT-based authentication
-- Role-based access control
-- Secure file uploads
-- API rate limiting
-
-## 📱 Mobile Strategy
-
-### Progressive Web App (PWA)
-- Installable from browser
-- Offline capabilities
-- Push notifications
-- Native app-like experience
-
-### Telegram Bot Integration
-- Quick entry of issues and fuel
-- Maintenance reminders
-- Trip logging
-- Photo uploads
-
-## 🔒 Security Considerations
-
-### Data Protection
-- Encrypted data transmission (HTTPS)
-- Secure file uploads
-- Input validation and sanitization
-- SQL injection prevention
-
-### Authentication
-- Secure password hashing
-- JWT token management
-- Session management
-- Rate limiting
-
-### File Security
-- File type validation
-- Virus scanning
-- Secure file storage
-- Access control
-
-## 📈 Performance Considerations
+## 📦 Technology Stack
 
 ### Frontend
-- Code splitting and lazy loading
-- Image optimization
-- Caching strategies
-- Bundle size optimization
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **UI Components**: Shadcn/ui + Custom components
+- **State Management**: React hooks + API service pattern
+- **Testing**: Jest + React Testing Library
 
 ### Backend
-- Database query optimization
-- Caching (Redis)
-- CDN for static assets
-- API response optimization
+- **Framework**: FastAPI
+- **Database**: SQLite (dev) / PostgreSQL (prod)
+- **ORM**: SQLAlchemy 2.0
+- **Authentication**: JWT tokens
+- **Testing**: Pytest
+- **Documentation**: OpenAPI/Swagger
 
-## 🧪 Testing Strategy
-
-### Frontend Testing
-- Unit tests for components
-- Integration tests for pages
-- E2E tests for critical flows
-- Visual regression testing
-
-### Backend Testing
-- Unit tests for business logic
-- Integration tests for API endpoints
-- Database migration testing
-- Performance testing
+### Infrastructure
+- **Development**: Local development
+- **Production**: Linux VPS (planned)
+- **Database**: PostgreSQL (production)
+- **File Storage**: Local (dev) / S3 (prod planned)
 
 ## 🚀 Deployment Strategy
 
-### Development
-- Local development with hot reload
-- Docker containers for consistency
-- Environment-specific configurations
+### Development Environment
+- Frontend: `npm run dev` (port 3000)
+- Backend: `uvicorn app.main:app --reload` (port 8000)
+- Database: SQLite file
 
-### Production
-- Containerized deployment
-- Load balancing
-- Database backups
-- Monitoring and logging
+### Production Environment (Planned)
+- **Hosting**: Hostinger VPS (Ubuntu)
+- **Frontend**: Next.js production build
+- **Backend**: Gunicorn + Uvicorn workers
+- **Database**: PostgreSQL 15+
+- **Reverse Proxy**: Nginx
+- **SSL**: Let's Encrypt
+- **Process Manager**: systemd
 
-## 📋 Development Phases
+## 📊 Database Design
 
-### Phase 1: Frontend Foundation ✅
-- [x] Next.js project setup
-- [x] UI component library
-- [x] Basic dashboard
-- [x] Car cards and layout
+### Core Tables (Implemented)
+```sql
+-- Users (multi-tenancy root)
+users: id, username, email, password_hash, is_admin, created_at
 
-### Phase 2: Backend Foundation ✅
-- [x] FastAPI backend setup
-- [x] SQLite database with SQLAlchemy ORM
-- [x] Car and ToDo models and schemas
-- [x] RESTful API endpoints
-- [x] Comprehensive unit tests
-- [x] Data export/import system
+-- Cars (user-isolated)
+cars: id, user_id, make, model, year, vin, mileage, group_name
 
-### Phase 3: Core Features ✅
-- [x] Car management (CRUD)
-- [x] Issue tracking (To-Dos)
-- [x] Car detail pages with tabbed interface
-- [x] Frontend-backend integration
-- [x] Form validation and error handling
+-- Service Intervals (user-isolated)
+service_intervals: id, user_id, car_id, service_item, interval_miles, 
+                  interval_months, priority, cost_estimates, source
 
-### Phase 4: Advanced Features
-- [ ] Maintenance tracking
-- [ ] Fuel mileage tracking
-- [ ] Trip journal
-- [ ] Photo gallery
-- [ ] Document management
-- [ ] Analytics and reports
+-- Service History (user-isolated)
+service_history: id, user_id, car_id, service_item, performed_date,
+                mileage, cost, notes, next_due_date
 
-### Phase 5: Integrations & File Storage
-- [ ] File upload system
-- [ ] Cloud storage integration
-- [ ] Image processing
-- [ ] Document management
+-- ToDos (user-isolated)
+todos: id, user_id, car_id, title, description, priority, status
+```
 
-### Phase 6: Mobile & Notifications
-- [ ] PWA implementation
-- [ ] Telegram bot
-- [ ] SMS notifications
-- [ ] Mobile optimization
+## 🔮 Future Enhancements
 
-### Phase 7: Production
-- [ ] Deployment setup
-- [ ] Performance optimization
-- [ ] Security hardening
-- [ ] Monitoring and logging
+### Phase 1: Core Improvements
+- [x] Fix date display bug ✅ FIXED
+- [ ] Add mileage update when marking service done
+- [ ] Service history export (CSV/PDF)
+- [ ] Email notifications for due services
+- [ ] Mobile app improvements
+
+### Phase 2: Advanced Features
+- [ ] VIN decoder integration
+- [ ] OBD-II real-time data
+- [ ] Service provider directory
+- [ ] Cost analytics dashboard
+- [ ] Predictive maintenance AI
+
+### Phase 3: Community Features
+- [ ] Service interval sharing
+- [ ] Make/model forums
+- [ ] DIY guides integration
+- [ ] Part number database
+- [ ] Group fleet management
+
+## 🏃 Quick Start Guide
+
+### Backend Setup
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+python init_db.py
+python create_admin.py
+uvicorn app.main:app --reload
+```
+
+### Frontend Setup
+```bash
+cd car-collection-prototype
+npm install
+npm run dev
+```
+
+### Default Credentials
+- Admin: `admin` / `admin123`
+- Test User: `jaime` / `testing1`
+
+## 📝 Session Notes (January 9, 2025)
+
+### Completed Today
+1. Fixed service history API integration
+2. Implemented real progress calculation
+3. Added engine type selection for diesel/gas
+4. Enhanced research API with real manufacturer data
+5. Created comprehensive test scripts
+6. Reset database for clean testing
+
+### Next Steps
+1. Add current mileage input when marking service done
+2. Implement service history view/export
+3. Add more engine type variants (hybrid, electric)
+4. Create dashboard with upcoming services
+5. Add email notifications for due services
+
+### Key Files Modified
+- `ServiceIntervalList.tsx` - Real progress calculation
+- `service_research.py` - Engine type support
+- `EngineTypeDialog.tsx` - New component
+- `service_api.py` - Engine type parameter
+- Database reset with clean data
 
 ---
 
-**Last Updated**: July 5, 2024
-**Version**: 1.1.0 
+**Last Updated**: January 9, 2025
+**Version**: 2.0 (Service Management Enhanced)

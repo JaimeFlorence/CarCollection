@@ -49,6 +49,7 @@ export interface Car {
   license_plate?: string;
   insurance_info?: string;
   notes?: string;
+  group_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -61,6 +62,7 @@ export interface CarCreate {
   license_plate?: string;
   insurance_info?: string;
   notes?: string;
+  group_name?: string;
 }
 
 // Updated ToDo interface with user_id
@@ -83,6 +85,73 @@ export interface ToDoCreate {
   description?: string;
   due_date?: string;
   priority: 'low' | 'medium' | 'high';
+}
+
+// Service Interval Interfaces
+export interface ServiceInterval {
+  id: number;
+  user_id: number;
+  car_id: number;
+  service_item: string;
+  interval_miles?: number;
+  interval_months?: number;
+  priority: 'low' | 'medium' | 'high';
+  cost_estimate_low?: number;
+  cost_estimate_high?: number;
+  notes?: string;
+  source?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceIntervalCreate {
+  car_id: number;
+  service_item: string;
+  interval_miles?: number;
+  interval_months?: number;
+  priority?: 'low' | 'medium' | 'high';
+  cost_estimate_low?: number;
+  cost_estimate_high?: number;
+  notes?: string;
+  source?: string;
+}
+
+export interface ServiceResearchResult {
+  service_item: string;
+  interval_miles?: number;
+  interval_months?: number;
+  priority: 'low' | 'medium' | 'high';
+  cost_estimate_low?: number;
+  cost_estimate_high?: number;
+  source: string;
+  confidence_score: number;
+  notes?: string;
+}
+
+export interface ServiceResearchResponse {
+  car_id: number;
+  make: string;
+  model: string;
+  year: number;
+  suggested_intervals: ServiceResearchResult[];
+  sources_checked: string[];
+  total_intervals_found: number;
+  research_date: string;
+}
+
+export interface ServiceHistory {
+  id: number;
+  user_id: number;
+  car_id: number;
+  service_item: string;
+  performed_date: string;
+  mileage?: number;
+  cost?: number;
+  notes?: string;
+  next_due_date?: string;
+  next_due_mileage?: number;
+  created_at: string;
 }
 
 class ApiService {
@@ -132,6 +201,11 @@ class ApiService {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`API request failed: ${response.statusText} - ${errorText}`);
+    }
+
+    // Handle 204 No Content responses (e.g., from DELETE operations)
+    if (response.status === 204) {
+      return null as T;
     }
 
     return response.json();
@@ -203,6 +277,11 @@ class ApiService {
     });
   }
 
+  // Group endpoints
+  async getCarGroups(): Promise<string[]> {
+    return this.request<string[]>('/cars/groups/');
+  }
+
   // ToDo endpoints (now require authentication)
   async getTodos(carId?: number): Promise<ToDo[]> {
     if (!carId) return [];
@@ -235,6 +314,62 @@ class ApiService {
   async deleteTodo(id: number): Promise<void> {
     return this.request<void>(`/todos/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  // Service Interval endpoints
+  async researchServiceIntervals(carId: number, engineType?: string): Promise<ServiceResearchResponse> {
+    const url = engineType 
+      ? `/api/cars/${carId}/research-intervals?engine_type=${engineType}`
+      : `/api/cars/${carId}/research-intervals`;
+    
+    return this.request<ServiceResearchResponse>(url, {
+      method: 'POST',
+    });
+  }
+
+  async getServiceIntervals(carId: number): Promise<ServiceInterval[]> {
+    return this.request<ServiceInterval[]>(`/api/cars/${carId}/service-intervals`);
+  }
+
+  async createServiceIntervals(carId: number, intervals: ServiceIntervalCreate[]): Promise<ServiceInterval[]> {
+    return this.request<ServiceInterval[]>(`/api/cars/${carId}/service-intervals/bulk`, {
+      method: 'POST',
+      body: JSON.stringify(intervals),
+    });
+  }
+  
+  async createServiceInterval(carId: number, interval: ServiceIntervalCreate): Promise<ServiceInterval> {
+    return this.request<ServiceInterval>(`/api/cars/${carId}/service-intervals`, {
+      method: 'POST',
+      body: JSON.stringify(interval),
+    });
+  }
+
+  async updateServiceInterval(intervalId: number, interval: Partial<ServiceIntervalCreate>): Promise<ServiceInterval> {
+    return this.request<ServiceInterval>(`/api/service-intervals/${intervalId}`, {
+      method: 'PUT',
+      body: JSON.stringify(interval),
+    });
+  }
+
+  async deleteServiceInterval(intervalId: number): Promise<void> {
+    return this.request<void>(`/api/service-intervals/${intervalId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getServiceHistory(carId: number): Promise<ServiceHistory[]> {
+    return this.request<ServiceHistory[]>(`/api/cars/${carId}/service-history`);
+  }
+
+  async createServiceHistory(carId: number, service: Omit<ServiceHistory, 'id' | 'user_id' | 'car_id' | 'created_at'>): Promise<ServiceHistory> {
+    return this.request<ServiceHistory>(`/api/cars/${carId}/service-history`, {
+      method: 'POST',
+      body: JSON.stringify({
+        ...service,
+        car_id: carId  // Include car_id in the request body as required by schema
+      }),
     });
   }
 }

@@ -46,13 +46,24 @@ def test_car_access(token):
             cars = response.json()
             print(f"✅ Successfully retrieved {len(cars)} cars")
             
-            # Show first few cars
+            # Show first few cars with groups
             print("\n📋 Sample cars:")
             for i, car in enumerate(cars[:5]):
-                print(f"  {i+1}. {car['year']} {car['make']} {car['model']} ({car['mileage']:,} miles)")
+                group = car.get('group_name', 'Daily Drivers')
+                print(f"  {i+1}. {car['year']} {car['make']} {car['model']} ({car['mileage']:,} miles) - {group}")
             
             if len(cars) > 5:
                 print(f"  ... and {len(cars) - 5} more cars")
+                
+            # Show group distribution
+            groups = {}
+            for car in cars:
+                group = car.get('group_name', 'Daily Drivers')
+                groups[group] = groups.get(group, 0) + 1
+            
+            print("\n📊 Cars by group:")
+            for group, count in groups.items():
+                print(f"  {group}: {count} cars")
             
             return cars
         else:
@@ -98,6 +109,31 @@ def test_todo_access(token, cars):
             return None
     except Exception as e:
         print(f"❌ Todo access request failed: {e}")
+        return None
+
+def test_groups_access(token):
+    """Test groups functionality."""
+    print("\n📊 Testing groups access...")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    try:
+        response = requests.get(f"{BASE_URL}/cars/groups/", headers=headers)
+        if response.status_code == 200:
+            groups = response.json()
+            print(f"✅ Groups access successful - found {len(groups)} groups")
+            
+            # Show groups
+            print("\n📂 Available groups:")
+            for group in groups:
+                print(f"  📁 {group}")
+            
+            return groups
+        else:
+            print(f"❌ Groups access failed: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"❌ Groups access request failed: {e}")
         return None
 
 def test_admin_access(token):
@@ -147,6 +183,9 @@ def main():
     # Test todo access
     todos = test_todo_access(token, cars)
     
+    # Test groups access
+    groups = test_groups_access(token)
+    
     # Test admin access
     users = test_admin_access(token)
     
@@ -157,6 +196,8 @@ def main():
         print(f"  ✅ Login: {user['username']} (Admin: {user['is_admin']})")
     if cars:
         print(f"  ✅ Cars: {len(cars)} cars in collection")
+    if groups:
+        print(f"  ✅ Groups: {len(groups)} groups available")
     if todos:
         print(f"  ✅ Todos: {len(todos)} todos for first car")
     if users:

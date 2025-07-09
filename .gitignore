@@ -118,3 +118,5 @@ pids
 # Temporary folders
 tmp/
 temp/ 
+# Cursor IDE
+.cursor/

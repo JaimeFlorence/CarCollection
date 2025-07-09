@@ -2,17 +2,21 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from . import models, schemas, crud, database
-from .database import SessionLocal, engine
+from .database import SessionLocal, engine, get_db
 from .auth import (
     authenticate_user, create_access_token, get_current_active_user,
     get_current_admin_user, update_last_login
 )
+from .service_api import router as service_router
 from typing import List
 from datetime import timedelta
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Car Collection API")
+
+# Include service API routes
+app.include_router(service_router, prefix="/api")
 
 # Allow frontend dev server
 app.add_middleware(
@@ -23,12 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# get_db function is now imported from database.py
 
 # Authentication Endpoints
 @app.post("/auth/login", response_model=schemas.Token)
@@ -146,6 +145,15 @@ def delete_car(
     if not crud.delete_car(db, car_id, current_user.id):
         raise HTTPException(status_code=404, detail="Car not found")
     return None
+
+# Group Endpoints
+@app.get("/cars/groups/", response_model=List[str])
+def get_car_groups(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user)
+):
+    """Get all unique group names for the current user's cars"""
+    return crud.get_user_car_groups(db, current_user.id)
 
 # ToDo Endpoints (Updated for multi-tenancy)
 @app.get("/cars/{car_id}/todos/", response_model=List[schemas.ToDoOut])

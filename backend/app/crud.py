@@ -98,6 +98,19 @@ def delete_car(db: Session, car_id: int, user_id: int) -> bool:
     db.commit()
     return True
 
+def get_user_car_groups(db: Session, user_id: int) -> List[str]:
+    """Get all unique group names for a user's cars"""
+    result = db.query(models.Car.group_name).filter(
+        models.Car.user_id == user_id,
+        models.Car.group_name.isnot(None)
+    ).distinct().all()
+    
+    # Extract the group names and ensure we have defaults if none exist
+    groups = [row[0] for row in result if row[0]]
+    if not groups:
+        return ["Daily Drivers", "Collector Cars"]
+    return sorted(groups)
+
 # ToDo CRUD operations (Updated for multi-tenancy)
 def get_todos_for_car(db: Session, car_id: int, user_id: int) -> List[models.ToDo]:
     return db.query(models.ToDo).filter(

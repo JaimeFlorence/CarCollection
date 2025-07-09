@@ -88,6 +88,20 @@ def import_cars_from_csv(user_id: int):
                 if not row.get('make') or not row.get('model'):
                     continue
                 
+                # Determine group name based on car characteristics
+                group_name = 'Daily Drivers'  # Default
+                if row.get('group_name') and row['group_name'].strip():
+                    group_name = row['group_name'].strip()
+                else:
+                    # Auto-assign based on car characteristics (year, make, etc.)
+                    year = int(row['year']) if row['year'] and row['year'].strip() else 0
+                    make = row['make'].lower() if row['make'] else ''
+                    
+                    # Classic/collector cars (older than 1990 or luxury brands)
+                    luxury_brands = ['porsche', 'ferrari', 'lamborghini', 'aston martin', 'bentley', 'rolls-royce', 'mclaren']
+                    if year < 1990 or any(brand in make for brand in luxury_brands):
+                        group_name = 'Collector Cars'
+                
                 # Create car object
                 car = Car(
                     user_id=user_id,
@@ -98,6 +112,7 @@ def import_cars_from_csv(user_id: int):
                     license_plate=row['license_plate'] if row['license_plate'] and row['license_plate'].strip() else None,
                     insurance_info=row['insurance_info'] if row['insurance_info'] and row['insurance_info'].strip() else None,
                     notes=row['notes'] if row['notes'] and row['notes'].strip() else None,
+                    group_name=group_name,
                     created_at=datetime.utcnow(),
                     updated_at=datetime.utcnow()
                 )
@@ -201,6 +216,17 @@ def verify_setup():
         # Check cars
         cars_count = db.query(Car).filter(Car.user_id == jaime.id).count()
         print(f"✅ Cars imported: {cars_count}")
+        
+        # Show group distribution
+        from sqlalchemy import func
+        groups = db.query(Car.group_name, func.count(Car.id)).filter(
+            Car.user_id == jaime.id
+        ).group_by(Car.group_name).all()
+        
+        print("📊 Cars by group:")
+        for group_name, count in groups:
+            group_display = group_name or 'Daily Drivers'
+            print(f"  {group_display}: {count} cars")
         
         # Check todos
         todos_count = db.query(ToDo).filter(ToDo.user_id == jaime.id).count()

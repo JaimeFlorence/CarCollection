@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import Optional, List
 from datetime import datetime
+from decimal import Decimal
 
 # User Schemas
 class UserBase(BaseModel):
@@ -88,6 +89,7 @@ class CarBase(BaseModel):
     license_plate: Optional[str] = None
     insurance_info: Optional[str] = None
     notes: Optional[str] = None
+    group_name: Optional[str] = "Daily Drivers"
 
 class CarCreate(CarBase):
     pass
@@ -101,6 +103,7 @@ class CarUpdate(BaseModel):
     license_plate: Optional[str] = None
     insurance_info: Optional[str] = None
     notes: Optional[str] = None
+    group_name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -111,4 +114,88 @@ class CarOut(CarBase):
     updated_at: datetime
     todos: List[ToDoOut] = []
 
-    model_config = ConfigDict(from_attributes=True) 
+    model_config = ConfigDict(from_attributes=True)
+
+# Service Interval Schemas
+class ServiceIntervalBase(BaseModel):
+    service_item: str
+    interval_miles: Optional[int] = None
+    interval_months: Optional[int] = None
+    priority: Optional[str] = "medium"
+    cost_estimate_low: Optional[Decimal] = None
+    cost_estimate_high: Optional[Decimal] = None
+    notes: Optional[str] = None
+    source: Optional[str] = None
+
+class ServiceIntervalCreate(ServiceIntervalBase):
+    car_id: int
+
+class ServiceIntervalUpdate(BaseModel):
+    service_item: Optional[str] = None
+    interval_miles: Optional[int] = None
+    interval_months: Optional[int] = None
+    priority: Optional[str] = None
+    cost_estimate_low: Optional[Decimal] = None
+    cost_estimate_high: Optional[Decimal] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class ServiceIntervalOut(ServiceIntervalBase):
+    id: int
+    user_id: int
+    car_id: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Service History Schemas
+class ServiceHistoryBase(BaseModel):
+    service_item: str
+    performed_date: datetime
+    mileage: Optional[int] = None
+    cost: Optional[Decimal] = None
+    notes: Optional[str] = None
+    next_due_date: Optional[datetime] = None
+    next_due_mileage: Optional[int] = None
+
+class ServiceHistoryCreate(ServiceHistoryBase):
+    car_id: int
+
+class ServiceHistoryOut(ServiceHistoryBase):
+    id: int
+    user_id: int
+    car_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Service Research Schemas
+class ServiceResearchRequest(BaseModel):
+    car_id: int
+
+class ServiceResearchResult(BaseModel):
+    service_item: str
+    interval_miles: Optional[int] = None
+    interval_months: Optional[int] = None
+    priority: str = "medium"
+    cost_estimate_low: Optional[Decimal] = None
+    cost_estimate_high: Optional[Decimal] = None
+    source: str
+    confidence_score: int = 5
+    notes: Optional[str] = None
+
+class ServiceResearchResponse(BaseModel):
+    car_id: int
+    make: str
+    model: str
+    year: int
+    suggested_intervals: List[ServiceResearchResult]
+    sources_checked: List[str]
+    total_intervals_found: int
+    research_date: datetime
+
+class ServiceIntervalBulkCreate(BaseModel):
+    car_id: int
+    intervals: List[ServiceIntervalCreate] 
