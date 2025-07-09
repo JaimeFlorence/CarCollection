@@ -55,7 +55,43 @@
 
 ### 📋 Pending Tasks
 
-#### High Priority
+#### 🔴 Immediate Priority - Service History System (Phase 1)
+1. **Step 1: Database Schema Updates** 🚀 NEXT
+   - [ ] Add `shop` field to ServiceHistory model
+   - [ ] Add `invoice_number` field
+   - [ ] Create migration script
+   - [ ] Test existing functionality still works
+
+2. **Step 2: Basic Service History Tab**
+   - [ ] Create ServiceHistoryTable component
+   - [ ] Display existing service records
+   - [ ] Implement date/mileage/shop/summary/cost columns
+   - [ ] Add to Service History tab (read-only)
+
+3. **Step 3: Service Entry Dialog**
+   - [ ] Create ServiceEntryDialog component
+   - [ ] Add "Add Service" button to Service History tab
+   - [ ] Implement form with date/mileage/shop/cost fields
+   - [ ] Connect to create service history API
+
+4. **Step 4: Service Schedule Integration**
+   - [ ] Add checkboxes to ServiceIntervalList
+   - [ ] Add "Record Service" button
+   - [ ] Pass selected items to ServiceEntryDialog
+   - [ ] Update service intervals when service recorded
+
+5. **Step 5: Edit/Delete Functionality**
+   - [ ] Make table rows clickable
+   - [ ] Open dialog with existing data
+   - [ ] Implement update API endpoint
+   - [ ] Add delete confirmation
+
+6. **Step 6: Grouping & Summary**
+   - [ ] Group services by date in table
+   - [ ] Calculate summary statistics
+   - [ ] Add filter/sort controls
+
+#### High Priority (After Service History Phase 1)
 1. **Testing & Quality**
    - [x] Fix date display bug in service history ✅ FIXED
    - [ ] Comprehensive test coverage for new features
@@ -92,6 +128,41 @@
    - [ ] SSL certificate setup
    - [ ] Environment configuration
    - [ ] Backup and monitoring setup
+
+#### 🟡 Service History Phase 2 (Analytics & Documentation)
+1. **Cost Analytics Dashboard**
+   - [ ] Basic cost summary component
+   - [ ] Cost by category chart
+   - [ ] Cost vs mileage trend analysis
+   - [ ] Comparison to fleet averages
+
+2. **Document Storage**
+   - [ ] Receipt photo upload
+   - [ ] PDF document upload
+   - [ ] Organize by service date
+   - [ ] Thumbnail preview gallery
+
+3. **Anonymous Data Collection**
+   - [ ] Design privacy-first data schema
+   - [ ] Implement opt-in data sharing
+   - [ ] Backend aggregation service
+   - [ ] Fleet comparison features
+
+#### 🔵 Service History Phase 3 (Advanced Features)
+1. **Mobile Integration**
+   - [ ] SMS receipt upload
+   - [ ] Telegram bot integration
+   - [ ] Mobile-optimized upload flow
+
+2. **Automation**
+   - [ ] OCR for receipt scanning
+   - [ ] Calendar integration
+   - [ ] Automated reminders
+
+3. **Fleet Management**
+   - [ ] Multi-vehicle dashboard
+   - [ ] Bulk service scheduling
+   - [ ] Fleet cost comparisons
 
 ---
 

@@ -148,6 +148,8 @@ export interface ServiceHistory {
   performed_date: string;
   mileage?: number;
   cost?: number;
+  shop?: string;  // New field
+  invoice_number?: string;  // New field
   notes?: string;
   next_due_date?: string;
   next_due_mileage?: number;
@@ -370,6 +372,19 @@ class ApiService {
         ...service,
         car_id: carId  // Include car_id in the request body as required by schema
       }),
+    });
+  }
+
+  async updateServiceHistory(serviceId: number, service: Partial<Omit<ServiceHistory, 'id' | 'user_id' | 'car_id' | 'created_at'>>): Promise<ServiceHistory> {
+    return this.request<ServiceHistory>(`/api/service-history/${serviceId}`, {
+      method: 'PUT',
+      body: JSON.stringify(service),
+    });
+  }
+
+  async deleteServiceHistory(serviceId: number): Promise<void> {
+    return this.request<void>(`/api/service-history/${serviceId}`, {
+      method: 'DELETE',
     });
   }
 }

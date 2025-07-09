@@ -156,12 +156,25 @@ class ServiceHistoryBase(BaseModel):
     performed_date: datetime
     mileage: Optional[int] = None
     cost: Optional[Decimal] = None
+    shop: Optional[str] = None  # New field
+    invoice_number: Optional[str] = None  # New field
     notes: Optional[str] = None
     next_due_date: Optional[datetime] = None
     next_due_mileage: Optional[int] = None
 
 class ServiceHistoryCreate(ServiceHistoryBase):
     car_id: int
+
+class ServiceHistoryUpdate(BaseModel):
+    service_item: Optional[str] = None
+    performed_date: Optional[datetime] = None
+    mileage: Optional[int] = None
+    cost: Optional[Decimal] = None
+    shop: Optional[str] = None
+    invoice_number: Optional[str] = None
+    notes: Optional[str] = None
+    next_due_date: Optional[datetime] = None
+    next_due_mileage: Optional[int] = None
 
 class ServiceHistoryOut(ServiceHistoryBase):
     id: int

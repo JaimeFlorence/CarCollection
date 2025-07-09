@@ -236,7 +236,89 @@ npm run dev
 - `service_api.py` - Engine type parameter
 - Database reset with clean data
 
+## 📋 Service History System (Planned - January 2025)
+
+### Overview
+Comprehensive service record tracking system that integrates with Service Schedule for streamlined maintenance management.
+
+### Core Features Design
+
+#### 1. Service History Table View
+**Layout:** Table with columns: Date | Mileage | Shop | Summary | Cost
+**Functionality:**
+- Group multiple service items by date into single record
+- Sort by date, shop, or cost
+- Filter by date range, shop, cost range
+- Summary stats: Total services, total cost, average cost
+
+#### 2. Service Entry Dialog
+**Unified Add/Edit Interface:**
+- Date, mileage, shop, invoice # fields
+- Service Schedule integration with checkboxes
+- Multiple service items per date
+- Cost entry updates Service Schedule estimates
+- Notes and attachments support
+
+#### 3. Service Schedule Integration
+**Workflow:**
+1. User selects items in Service Schedule (checkboxes)
+2. Clicks "Record Service" button
+3. Dialog opens with selected items pre-checked
+4. User adds costs, shop info, notes
+5. Save updates both Service History and Schedule progress
+
+### Implementation Phases
+
+#### Phase 1: Core Functionality
+1. **Step 1:** Database schema updates (add shop, invoice_number)
+2. **Step 2:** Basic Service History tab (read-only table)
+3. **Step 3:** Service entry dialog (manual entry)
+4. **Step 4:** Service Schedule integration
+5. **Step 5:** Edit/delete functionality
+6. **Step 6:** Date grouping and summary stats
+
+#### Phase 2: Analytics & Documentation
+- Cost analysis dashboard
+- Cost vs mileage trends
+- Document storage (photos, PDFs)
+- Anonymous data collection for trends
+
+#### Phase 3: Advanced Features (Future)
+- SMS/Telegram receipt upload
+- OCR for automatic data extraction
+- Calendar integration
+- Parts tracking
+- Fleet dashboard
+
+### Technical Architecture
+
+#### Backend Changes
+```python
+# ServiceHistory model additions
+shop = Column(String)
+invoice_number = Column(String)
+service_items = relationship("ServiceHistoryItem")
+
+# New ServiceHistoryItem model
+service_history_id = ForeignKey
+service_interval_id = ForeignKey  # Links to schedule
+actual_cost = Column(Float)
+```
+
+#### API Endpoints
+- GET /api/cars/{id}/service-history (enhanced with grouping)
+- POST /api/cars/{id}/service-history (enhanced with items)
+- PUT /api/service-history/{id}
+- DELETE /api/service-history/{id}
+
+### Data Collection Strategy
+Anonymous service data for industry trends:
+- Vehicle make/model/year/mileage range
+- Service type and cost
+- Geographic region
+- No personally identifiable information
+
 ---
 
 **Last Updated**: January 9, 2025
-**Version**: 2.0 (Service Management Enhanced)
+**Version**: 2.1 (Service History System Planned)

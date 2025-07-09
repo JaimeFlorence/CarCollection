@@ -91,6 +91,8 @@ class ServiceHistory(Base):
     performed_date = Column(DateTime, nullable=False)
     mileage = Column(Integer, nullable=True)
     cost = Column(Numeric(10, 2), nullable=True)
+    shop = Column(String, nullable=True)  # New field for service provider
+    invoice_number = Column(String, nullable=True)  # New field for invoice tracking
     notes = Column(Text, nullable=True)
     next_due_date = Column(DateTime, nullable=True)
     next_due_mileage = Column(Integer, nullable=True)

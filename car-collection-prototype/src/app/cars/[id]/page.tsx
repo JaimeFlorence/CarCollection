@@ -2,12 +2,14 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from "react";
-import { apiService, ToDo, ServiceInterval, ServiceIntervalCreate } from "../../../lib/api";
+import { apiService, ToDo, ServiceInterval, ServiceIntervalCreate, ServiceHistory } from "../../../lib/api";
 import { DEFAULT_SERVICE_INTERVALS } from "../../../lib/defaultServiceIntervals";
 import ToDosTab from "../../../components/ToDosTab";
 import ServiceIntervalList from "../../../components/ServiceIntervalList";
 import ServiceIntervalEditModal from "../../../components/ServiceIntervalEditModal";
 import ServiceIntervalAddModal from "../../../components/ServiceIntervalAddModal";
+import ServiceHistoryTable from "../../../components/ServiceHistoryTable";
+import ServiceEntryDialog from "../../../components/ServiceEntryDialog";
 import EngineTypeDialog from "../../../components/EngineTypeDialog";
 import { ProtectedRoute } from "../../../components/ProtectedRoute";
 import { Header } from "../../../components/Header";
@@ -64,21 +66,27 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
   const [showAddModal, setShowAddModal] = useState(false);
   const [serviceRefreshTrigger, setServiceRefreshTrigger] = useState(0);
   const [showEngineTypeDialog, setShowEngineTypeDialog] = useState(false);
+  const [serviceHistory, setServiceHistory] = useState<ServiceHistory[]>([]);
+  const [loadingServiceHistory, setLoadingServiceHistory] = useState(false);
+  const [showServiceEntryDialog, setShowServiceEntryDialog] = useState(false);
+  const [editingService, setEditingService] = useState<ServiceHistory | null>(null);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
     
-    // Load car data, groups, and service intervals
+    // Load car data, groups, service intervals, and service history
     Promise.all([
       apiService.getCar(Number(id)),
       apiService.getCarGroups(),
-      apiService.getServiceIntervals(Number(id))
+      apiService.getServiceIntervals(Number(id)),
+      apiService.getServiceHistory(Number(id))
     ])
-      .then(([carData, groupsData, intervalsData]) => {
+      .then(([carData, groupsData, intervalsData, historyData]) => {
         setCar(carData);
         setGroups(groupsData);
         setServiceIntervals(intervalsData);
+        setServiceHistory(historyData);
         setSelectedGroup(carData.group_name || 'Daily Drivers');
       })
       .catch((err) => {
@@ -350,13 +358,44 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
     }
   };
 
+  const handleSaveServiceRecord = async (serviceData: Partial<ServiceHistory>) => {
+    try {
+      if (editingService) {
+        // Update existing service
+        await apiService.updateServiceHistory(editingService.id, serviceData);
+      } else {
+        // Create new service
+        await apiService.createServiceHistory(Number(id), {
+          car_id: Number(id),
+          ...serviceData
+        } as any);
+      }
+      
+      // Refresh service history
+      const updatedHistory = await apiService.getServiceHistory(Number(id));
+      setServiceHistory(updatedHistory);
+      
+      // Close dialog and reset editing state
+      setShowServiceEntryDialog(false);
+      setEditingService(null);
+    } catch (error) {
+      console.error('Failed to save service record:', error);
+      throw error; // Let the dialog handle the error
+    }
+  };
+
+  const handleEditService = (service: ServiceHistory) => {
+    setEditingService(service);
+    setShowServiceEntryDialog(true);
+  };
+
   const tabs = [
     { label: "Overview", key: "overview" },
     { label: "To-Dos", key: "todos" },
     { label: "Service Schedule", key: "service-schedule" },
-    { label: "Fuel", key: "fuel" },
-    { label: "Service", key: "service" },
+    { label: "Service History", key: "service" },
     { label: "Repairs", key: "repairs" },
+    { label: "Fuel", key: "fuel" },
     { label: "Photos", key: "photos" },
   ];
 
@@ -638,43 +677,34 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
           )}
           {activeTab === "service" && (
             <section id="tab-panel-service" role="tabpanel">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-6">Service History</h2>
-              <div className="space-y-4">
-                {car.service && car.service.length > 0 ? (
-                  car.service.map((s: any) => (
-                    <div key={s.id} className="bg-slate-50 rounded-lg p-4 border border-slate-200 hover:border-blue-200 transition-colors">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <div className="text-sm text-slate-600 mb-1">Date</div>
-                          <div className="font-medium text-slate-900">{new Date(s.date).toLocaleDateString()}</div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-slate-600 mb-1">Service Type</div>
-                          <div className="font-medium text-slate-900">{s.type}</div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-slate-600 mb-1">Notes</div>
-                          <div className="text-slate-800">{s.notes || 'No notes'}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12 bg-slate-50 rounded-lg border border-slate-200">
-                    <svg className="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <p className="text-slate-500 mb-4">No service records found</p>
-                  </div>
-                )}
-                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-sm hover:shadow-md flex items-center justify-center gap-2">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-slate-900">Service History</h2>
+                <button
+                  onClick={() => setShowServiceEntryDialog(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Add Service Record
+                  Add Service
                 </button>
               </div>
+              <ServiceHistoryTable 
+                carId={Number(id)} 
+                serviceHistory={serviceHistory}
+                loading={loadingServiceHistory}
+                onEdit={handleEditService}
+              />
+              <ServiceEntryDialog
+                carId={Number(id)}
+                isOpen={showServiceEntryDialog}
+                onClose={() => {
+                  setShowServiceEntryDialog(false);
+                  setEditingService(null);
+                }}
+                onSave={handleSaveServiceRecord}
+                existingService={editingService || undefined}
+              />
             </section>
           )}
           {activeTab === "repairs" && (

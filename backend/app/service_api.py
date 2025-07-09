@@ -7,6 +7,7 @@ performing service research.
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime
 import json
@@ -111,7 +112,7 @@ async def create_service_interval(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user)
 ):
-    """Create a single service interval for a car"""
+    """Create a single service interval for a car, updating if it already exists"""
     
     # Verify car ownership
     car = db.query(models.Car).filter(
@@ -125,25 +126,49 @@ async def create_service_interval(
             detail="Car not found"
         )
     
-    # Create service interval
-    db_interval = models.ServiceInterval(
-        user_id=current_user.id,
-        car_id=car_id,
-        service_item=interval.service_item,
-        interval_miles=interval.interval_miles,
-        interval_months=interval.interval_months,
-        priority=interval.priority or "medium",
-        cost_estimate_low=interval.cost_estimate_low,
-        cost_estimate_high=interval.cost_estimate_high,
-        notes=interval.notes,
-        source=interval.source or "user_entered"
-    )
+    # Check if interval already exists (case-insensitive)
+    existing_interval = db.query(models.ServiceInterval).filter(
+        models.ServiceInterval.car_id == car_id,
+        models.ServiceInterval.user_id == current_user.id,
+        models.ServiceInterval.is_active == True,
+        func.lower(models.ServiceInterval.service_item) == interval.service_item.lower()
+    ).first()
     
-    db.add(db_interval)
-    db.commit()
-    db.refresh(db_interval)
-    
-    return db_interval
+    if existing_interval:
+        # Update existing interval
+        existing_interval.interval_miles = interval.interval_miles
+        existing_interval.interval_months = interval.interval_months
+        existing_interval.priority = interval.priority or existing_interval.priority
+        existing_interval.cost_estimate_low = interval.cost_estimate_low
+        existing_interval.cost_estimate_high = interval.cost_estimate_high
+        existing_interval.notes = interval.notes or existing_interval.notes
+        existing_interval.source = interval.source or existing_interval.source
+        existing_interval.updated_at = datetime.now()
+        
+        db.commit()
+        db.refresh(existing_interval)
+        
+        return existing_interval
+    else:
+        # Create new interval
+        db_interval = models.ServiceInterval(
+            user_id=current_user.id,
+            car_id=car_id,
+            service_item=interval.service_item,
+            interval_miles=interval.interval_miles,
+            interval_months=interval.interval_months,
+            priority=interval.priority or "medium",
+            cost_estimate_low=interval.cost_estimate_low,
+            cost_estimate_high=interval.cost_estimate_high,
+            notes=interval.notes,
+            source=interval.source or "user_entered"
+        )
+        
+        db.add(db_interval)
+        db.commit()
+        db.refresh(db_interval)
+        
+        return db_interval
 
 @router.post("/cars/{car_id}/service-intervals/bulk", response_model=List[schemas.ServiceIntervalOut])
 async def create_service_intervals_bulk(
@@ -152,7 +177,7 @@ async def create_service_intervals_bulk(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user)
 ):
-    """Create multiple service intervals for a car"""
+    """Create multiple service intervals for a car, updating existing ones if they already exist"""
     
     # Verify car ownership
     car = db.query(models.Car).filter(
@@ -166,33 +191,59 @@ async def create_service_intervals_bulk(
             detail="Car not found"
         )
     
-    created_intervals = []
+    # Get all existing intervals for this car
+    existing_intervals = db.query(models.ServiceInterval).filter(
+        models.ServiceInterval.car_id == car_id,
+        models.ServiceInterval.user_id == current_user.id,
+        models.ServiceInterval.is_active == True
+    ).all()
+    
+    # Create a dictionary of existing intervals by service_item (case-insensitive)
+    existing_dict = {interval.service_item.lower(): interval for interval in existing_intervals}
+    
+    processed_intervals = []
     
     for interval_data in intervals:
-        # Create service interval
-        db_interval = models.ServiceInterval(
-            user_id=current_user.id,
-            car_id=car_id,
-            service_item=interval_data.service_item,
-            interval_miles=interval_data.interval_miles,
-            interval_months=interval_data.interval_months,
-            priority=interval_data.priority,
-            cost_estimate_low=interval_data.cost_estimate_low,
-            cost_estimate_high=interval_data.cost_estimate_high,
-            notes=interval_data.notes,
-            source=interval_data.source or "user_entered"
-        )
+        service_item_lower = interval_data.service_item.lower()
         
-        db.add(db_interval)
-        created_intervals.append(db_interval)
+        # Check if interval already exists (case-insensitive)
+        if service_item_lower in existing_dict:
+            # Update existing interval
+            existing_interval = existing_dict[service_item_lower]
+            existing_interval.interval_miles = interval_data.interval_miles
+            existing_interval.interval_months = interval_data.interval_months
+            existing_interval.priority = interval_data.priority or existing_interval.priority
+            existing_interval.cost_estimate_low = interval_data.cost_estimate_low
+            existing_interval.cost_estimate_high = interval_data.cost_estimate_high
+            existing_interval.notes = interval_data.notes or existing_interval.notes
+            existing_interval.source = interval_data.source or existing_interval.source
+            existing_interval.updated_at = datetime.now()
+            processed_intervals.append(existing_interval)
+        else:
+            # Create new interval
+            db_interval = models.ServiceInterval(
+                user_id=current_user.id,
+                car_id=car_id,
+                service_item=interval_data.service_item,
+                interval_miles=interval_data.interval_miles,
+                interval_months=interval_data.interval_months,
+                priority=interval_data.priority or "medium",
+                cost_estimate_low=interval_data.cost_estimate_low,
+                cost_estimate_high=interval_data.cost_estimate_high,
+                notes=interval_data.notes,
+                source=interval_data.source or "user_entered"
+            )
+            
+            db.add(db_interval)
+            processed_intervals.append(db_interval)
     
     db.commit()
     
     # Refresh all objects to get updated data
-    for interval in created_intervals:
+    for interval in processed_intervals:
         db.refresh(interval)
     
-    return created_intervals
+    return processed_intervals
 
 @router.get("/cars/{car_id}/service-intervals", response_model=List[schemas.ServiceIntervalOut])
 async def get_car_service_intervals(
@@ -309,6 +360,8 @@ async def create_service_history(
         performed_date=service_data.performed_date,
         mileage=service_data.mileage,
         cost=service_data.cost,
+        shop=service_data.shop,
+        invoice_number=service_data.invoice_number,
         notes=service_data.notes,
         next_due_date=service_data.next_due_date,
         next_due_mileage=service_data.next_due_mileage
@@ -346,6 +399,62 @@ async def get_car_service_history(
     ).order_by(models.ServiceHistory.performed_date.desc()).all()
     
     return history
+
+@router.put("/service-history/{service_id}", response_model=schemas.ServiceHistoryOut)
+async def update_service_history(
+    service_id: int,
+    service_update: schemas.ServiceHistoryUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user)
+):
+    """Update a service history entry"""
+    
+    # Get the service history entry and verify ownership
+    service = db.query(models.ServiceHistory).filter(
+        models.ServiceHistory.id == service_id,
+        models.ServiceHistory.user_id == current_user.id
+    ).first()
+    
+    if not service:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Service history entry not found"
+        )
+    
+    # Update fields
+    update_data = service_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(service, field, value)
+    
+    db.commit()
+    db.refresh(service)
+    
+    return service
+
+@router.delete("/service-history/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_service_history(
+    service_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user)
+):
+    """Delete a service history entry"""
+    
+    # Get the service history entry and verify ownership
+    service = db.query(models.ServiceHistory).filter(
+        models.ServiceHistory.id == service_id,
+        models.ServiceHistory.user_id == current_user.id
+    ).first()
+    
+    if not service:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Service history entry not found"
+        )
+    
+    db.delete(service)
+    db.commit()
+    
+    return {"message": "Service history entry deleted successfully"}
 
 @router.get("/service-intervals/due", response_model=List[schemas.ServiceIntervalOut])
 async def get_due_service_intervals(
