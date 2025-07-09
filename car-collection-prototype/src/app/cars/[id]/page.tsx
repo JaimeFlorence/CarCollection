@@ -11,6 +11,7 @@ import ServiceIntervalAddModal from "../../../components/ServiceIntervalAddModal
 import ServiceHistoryTable from "../../../components/ServiceHistoryTable";
 import ServiceEntryDialog from "../../../components/ServiceEntryDialog";
 import EngineTypeDialog from "../../../components/EngineTypeDialog";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 import { ProtectedRoute } from "../../../components/ProtectedRoute";
 import { Header } from "../../../components/Header";
 import React from "react";
@@ -70,6 +71,9 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
   const [loadingServiceHistory, setLoadingServiceHistory] = useState(false);
   const [showServiceEntryDialog, setShowServiceEntryDialog] = useState(false);
   const [editingService, setEditingService] = useState<ServiceHistory | null>(null);
+  const [deletingService, setDeletingService] = useState<ServiceHistory | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [preselectedInterval, setPreselectedInterval] = useState<ServiceInterval | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -107,7 +111,7 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
   const handleGroupSave = async () => {
     try {
       await apiService.updateCar(Number(id), { group_name: selectedGroup });
-      setCar(prev => ({ ...prev, group_name: selectedGroup }));
+      setCar((prev: any) => ({ ...prev, group_name: selectedGroup }));
       setIsEditingGroup(false);
     } catch (error) {
       console.error('Failed to update group:', error);
@@ -179,37 +183,10 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
       console.log('Successfully deleted service interval');
     } catch (error) {
       console.error('Failed to delete service interval:', error);
-      alert(`Failed to delete service interval. Error: ${error.message}`);
+      alert(`Failed to delete service interval. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
-  const handleAddServiceHistory = async (interval: ServiceInterval) => {
-    // Create a proper service history entry
-    const serviceData = {
-      service_item: interval.service_item,
-      performed_date: new Date().toISOString(),
-      mileage: car.mileage || 0,
-      cost: interval.cost_estimate_low ? Number(interval.cost_estimate_low) : undefined,
-      notes: `Completed ${interval.service_item}`,
-      next_due_mileage: interval.interval_miles ? (car.mileage || 0) + interval.interval_miles : undefined
-    };
-    
-    try {
-      await apiService.createServiceHistory(Number(id), serviceData);
-      alert(`Service recorded: ${interval.service_item}\n\nThis has been logged to your service history.`);
-      
-      // Trigger refresh of the service schedule to update progress
-      setServiceRefreshTrigger(prev => prev + 1);
-      
-      // Also refresh the intervals to ensure consistency
-      const updatedIntervals = await apiService.getServiceIntervals(Number(id));
-      setServiceIntervals(updatedIntervals);
-    } catch (error) {
-      console.error('Failed to record service:', error);
-      console.error('Service data that failed:', serviceData);
-      alert(`Failed to record service. Please try again.\n\nError: ${error.message}`);
-    }
-  };
 
   const handleAddServiceInterval = async (interval: ServiceIntervalCreate) => {
     try {
@@ -358,7 +335,7 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
     }
   };
 
-  const handleSaveServiceRecord = async (serviceData: Partial<ServiceHistory>) => {
+  const handleSaveServiceRecord = async (serviceData: Partial<ServiceHistory>, selectedIntervalIds?: number[]) => {
     try {
       if (editingService) {
         // Update existing service
@@ -369,6 +346,13 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
           car_id: Number(id),
           ...serviceData
         } as any);
+      }
+      
+      // If intervals were selected, just trigger a refresh
+      // The ServiceIntervalList will recalculate progress based on the new service history
+      if (selectedIntervalIds && selectedIntervalIds.length > 0) {
+        // Trigger refresh in ServiceIntervalList
+        setServiceRefreshTrigger(prev => prev + 1);
       }
       
       // Refresh service history
@@ -386,6 +370,39 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
 
   const handleEditService = (service: ServiceHistory) => {
     setEditingService(service);
+    setShowServiceEntryDialog(true);
+  };
+
+  const handleDeleteService = (service: ServiceHistory) => {
+    setDeletingService(service);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteService = async () => {
+    if (!deletingService) return;
+    
+    try {
+      await apiService.deleteServiceHistory(deletingService.id);
+      
+      // Refresh service history
+      const updatedHistory = await apiService.getServiceHistory(Number(id));
+      setServiceHistory(updatedHistory);
+      
+      // Reset state
+      setDeletingService(null);
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error('Failed to delete service record:', error);
+      alert('Failed to delete service record. Please try again.');
+    }
+  };
+
+  const handleAddServiceHistory = (interval: ServiceInterval) => {
+    // Set the interval to pre-populate and pre-select
+    setPreselectedInterval(interval);
+    setEditingService(null); // Make sure we're not in edit mode
+    
+    // Open the service entry dialog
     setShowServiceEntryDialog(true);
   };
 
@@ -628,6 +645,7 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
                 onEdit={handleEditServiceInterval}
                 onDelete={handleDeleteServiceInterval}
                 onAddService={handleAddServiceHistory}
+                refreshTrigger={serviceRefreshTrigger}
               />
             </section>
           )}
@@ -694,16 +712,19 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
                 serviceHistory={serviceHistory}
                 loading={loadingServiceHistory}
                 onEdit={handleEditService}
+                onDelete={handleDeleteService}
               />
-              <ServiceEntryDialog
-                carId={Number(id)}
-                isOpen={showServiceEntryDialog}
+              <ConfirmDialog
+                isOpen={showDeleteConfirm}
                 onClose={() => {
-                  setShowServiceEntryDialog(false);
-                  setEditingService(null);
+                  setShowDeleteConfirm(false);
+                  setDeletingService(null);
                 }}
-                onSave={handleSaveServiceRecord}
-                existingService={editingService || undefined}
+                onConfirm={confirmDeleteService}
+                title="Delete Service Record"
+                message={`Are you sure you want to delete "${deletingService?.service_item}"? This action cannot be undone.`}
+                confirmText="Delete"
+                cancelText="Cancel"
               />
             </section>
           )}
@@ -827,6 +848,34 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
             }}
           />
         )}
+        
+        {/* Service Entry Dialog */}
+        <ServiceEntryDialog
+          carId={car.id}
+          isOpen={showServiceEntryDialog}
+          onClose={() => {
+            setShowServiceEntryDialog(false);
+            setEditingService(null);
+            setPreselectedInterval(null);
+          }}
+          onSave={handleSaveServiceRecord}
+          existingService={editingService || undefined}
+          preselectedInterval={preselectedInterval}
+        />
+        
+        {/* Confirm Delete Dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          onClose={() => {
+            setShowDeleteConfirm(false);
+            setDeletingService(null);
+          }}
+          onConfirm={confirmDeleteService}
+          title="Delete Service Record"
+          message={`Are you sure you want to delete this service record? This action cannot be undone.`}
+          confirmText="Delete"
+          confirmButtonClass="bg-red-600 hover:bg-red-700"
+        />
       </div>
     </ProtectedRoute>
   );
