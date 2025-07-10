@@ -1,9 +1,6 @@
 # Car Collection Deployment Guide
 
-This guide provides the complete, working deployment process for the Car Collection Management Application to a VPS.
-
-**Last Updated**: January 10, 2025  
-**Status**: ✅ Successfully deployed to http://93.127.194.202
+This guide will help you deploy the Car Collection Management Application to your VPS.
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
@@ -21,12 +18,12 @@ This guide provides the complete, working deployment process for the Car Collect
 - Ubuntu 22.04 LTS or newer
 - Minimum 2GB RAM (4GB recommended)
 - 20GB storage
-- Public IP address (e.g., 93.127.194.202)
+- Public IP address (93.127.194.202)
 
 ### Required Software
 - Python 3.10+
-- Node.js 18+ and npm
-- SQLite (default) or PostgreSQL 14+ (optional)
+- Node.js 18+
+- PostgreSQL 14+ (optional, for production)
 - Nginx
 - Git
 
@@ -99,20 +96,18 @@ GRANT ALL PRIVILEGES ON DATABASE carcollection_db TO carcollection;
 ```
 
 ### 3. Configure Environment Variables
-
-#### For HTTP deployment (no domain yet)
 Create `/opt/carcollection/backend/.env`:
 ```bash
 # Database Configuration
-DATABASE_URL=sqlite:///./car_collection.db
+DATABASE_URL=postgresql://carcollection:your-password@localhost/carcollection_db
 
 # Security Configuration
 SECRET_KEY=your-generated-secret-key-here
 JWT_ALGORITHM=HS256
 JWT_EXPIRATION_HOURS=4
 
-# CORS Configuration - IMPORTANT: Use proper JSON array format
-CORS_ORIGINS=["http://YOUR_VPS_IP"]
+# CORS Configuration (update with your domain)
+CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 
 # Application Settings
 ENVIRONMENT=production
@@ -122,12 +117,9 @@ DEBUG=False
 INVITATION_EXPIRY_DAYS=7
 ALLOW_REGISTRATION=False
 
-# Frontend URL
-FRONTEND_URL=http://YOUR_VPS_IP
+# Frontend URL (update with your domain)
+FRONTEND_URL=https://yourdomain.com
 ```
-
-#### For HTTPS deployment (with domain)
-Update the CORS_ORIGINS and FRONTEND_URL to use https and your domain.
 
 Create `/opt/carcollection/car-collection-prototype/.env.local`:
 ```bash
@@ -142,42 +134,20 @@ NEXT_PUBLIC_ENABLE_INVITATIONS=true
 
 ## Application Deployment
 
-### Quick Deployment (Recommended)
-
-For a working deployment, use the quick-fix script that was successfully tested:
-
+### 1. Clone Repository
 ```bash
-# As root user
-cd /opt
-git clone https://github.com/yourusername/CarCollection.git carcollection
-cd carcollection
-
-# Run the quick deployment
-chmod +x quick-fix.sh
-./quick-fix.sh
-```
-
-This script will:
-1. Fix the CORS configuration
-2. Create your admin user interactively
-3. Restart all services
-4. Provide the access URL
-
-### Standard Deployment Process
-
-#### 1. Clone Repository
-```bash
-# As root or with sudo
+# As the carcollection user
+su - carcollection
 cd /opt
 sudo mkdir -p carcollection
-sudo chown $USER:$USER carcollection
+sudo chown carcollection:carcollection carcollection
 cd carcollection
 
 # Clone your repository
 git clone https://github.com/yourusername/CarCollection.git .
 ```
 
-#### 2. Run Deployment Script
+### 2. Run Deployment Script
 ```bash
 # Make sure you're in /opt/carcollection
 cd /opt/carcollection
@@ -200,9 +170,6 @@ pip install --upgrade pip
 pip install -r requirements.txt
 pip install gunicorn
 
-# IMPORTANT: Install pydantic-settings (often missing)
-pip install pydantic-settings==2.1.0
-
 # Initialize database
 python init_db.py
 
@@ -216,11 +183,10 @@ deactivate
 ```bash
 cd /opt/carcollection/car-collection-prototype
 
-# Install dependencies (use npm install instead of ci to avoid lock file issues)
-npm install
+# Install dependencies
+npm ci
 
-# Build for production (may show ESLint warnings - this is normal)
-export NEXT_TELEMETRY_DISABLED=1
+# Build for production
 npm run build
 
 # Install PM2 (alternative to systemd for Node.js)
@@ -388,69 +354,32 @@ sudo systemctl restart carcollection-backend carcollection-frontend
 
 ## Troubleshooting
 
-### Common Issues and Solutions
+### Common Issues
 
-1. **Module not found: '@/lib/defaultServiceIntervals'**
-   ```bash
-   cd /opt/carcollection
-   git add -f car-collection-prototype/src/lib/defaultServiceIntervals.ts
-   git commit -m "Add gitignored file"
-   git push
-   ```
-
-2. **ESLint errors during build**
-   - Add to `next.config.js`:
-   ```javascript
-   eslint: {
-     ignoreDuringBuilds: true,
-   },
-   typescript: {
-     ignoreBuildErrors: true,
-   }
-   ```
-
-3. **npm ci fails with package-lock.json**
-   - Use `npm install` instead of `npm ci`
-
-4. **PydanticImportError: BaseSettings**
-   ```bash
-   cd /opt/carcollection/backend
-   source venv/bin/activate
-   pip install pydantic-settings==2.1.0
-   deactivate
-   ```
-
-5. **CORS_ORIGINS JSON parsing error**
-   - Ensure proper JSON array format in .env:
-   ```
-   CORS_ORIGINS=["http://93.127.194.202"]
-   ```
-   - NOT: `CORS_ORIGINS=http://93.127.194.202`
-
-6. **502 Bad Gateway**
+1. **502 Bad Gateway**
    - Check if backend is running: `sudo systemctl status carcollection-backend`
    - Check backend logs: `sudo journalctl -u carcollection-backend -n 50`
-   - Verify pydantic-settings is installed
 
-7. **Frontend not loading**
+2. **Frontend not loading**
    - Check if frontend is running: `sudo systemctl status carcollection-frontend`
    - Check frontend logs: `sudo journalctl -u carcollection-frontend -n 50`
-   - Ensure port 3001 is not blocked
 
-8. **Permission errors**
-   - Fix ownership: `sudo chown -R $USER:$USER /opt/carcollection`
-   - Create log directory: `sudo mkdir -p /var/log/carcollection`
+3. **Database connection errors**
+   - Verify PostgreSQL is running: `sudo systemctl status postgresql`
+   - Check database credentials in .env file
+   - Test connection: `psql -U carcollection -d carcollection_db`
+
+4. **Permission errors**
+   - Ensure correct ownership: `sudo chown -R carcollection:carcollection /opt/carcollection`
+   - Check log directory: `sudo chown carcollection:carcollection /var/log/carcollection`
 
 ### Health Checks
 ```bash
 # Check all services
-sudo systemctl status carcollection-backend carcollection-frontend nginx
+sudo systemctl status carcollection-backend carcollection-frontend nginx postgresql
 
 # Test API endpoint
-curl http://YOUR_VPS_IP/api/docs
-
-# Check if services are listening
-sudo ss -tlnp | grep -E '3001|8000'
+curl https://yourdomain.com/api/docs
 
 # Check disk space
 df -h
@@ -458,30 +387,8 @@ df -h
 # Check memory usage
 free -m
 
-# Test frontend
-curl -I http://YOUR_VPS_IP
-
-# Check nginx error log
-sudo tail -f /var/log/nginx/error.log
-```
-
-### Quick Diagnostic Script
-```bash
-#!/bin/bash
-echo "=== Service Status ==="
-sudo systemctl is-active carcollection-backend
-sudo systemctl is-active carcollection-frontend
-sudo systemctl is-active nginx
-
-echo -e "\n=== Port Check ==="
-sudo ss -tlnp | grep -E '3001|8000|80'
-
-echo -e "\n=== Recent Logs ==="
-sudo journalctl -u carcollection-backend -n 5 --no-pager
-sudo journalctl -u carcollection-frontend -n 5 --no-pager
-
-echo -e "\n=== API Test ==="
-curl -s http://localhost:8000/docs | head -n 5
+# Check active connections
+ss -tulpn
 ```
 
 ## Security Best Practices

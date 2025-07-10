@@ -163,28 +163,14 @@
 - Backend: `uvicorn app.main:app --reload` (port 8000)
 - Database: SQLite file
 
-### Production Environment ✅ DEPLOYED (January 10, 2025)
-- **Hosting**: VPS at 93.127.194.202
-- **Frontend**: Next.js production build (port 3001)
-- **Backend**: Gunicorn + Uvicorn workers (port 8000)
-- **Database**: SQLite (currently) / PostgreSQL 15+ (optional)
+### Production Environment (Planned)
+- **Hosting**: Hostinger VPS (Ubuntu)
+- **Frontend**: Next.js production build
+- **Backend**: Gunicorn + Uvicorn workers
+- **Database**: PostgreSQL 15+
 - **Reverse Proxy**: Nginx
-- **SSL**: Not yet configured (HTTP only)
+- **SSL**: Let's Encrypt
 - **Process Manager**: systemd
-- **Live URL**: http://93.127.194.202
-
-### Invitation System ✅ IMPLEMENTED (January 10, 2025)
-- **Status**: Fully functional invitation-only registration
-- **Features**:
-  - Admin can create time-limited invitation tokens
-  - Email-based invitations with unique URLs
-  - Invitation management UI in admin panel
-  - Automatic expiration after 7 days
-  - Role assignment (admin/user) during invitation
-- **Security**:
-  - Registration disabled by default
-  - Only valid invitation tokens allow account creation
-  - Tokens are single-use and expire after use
 
 ## 📊 Database Design
 
