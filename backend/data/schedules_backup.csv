@@ -1,11 +1,4 @@
 id,user_id,car_id,service_item,interval_miles,interval_months,priority,cost_estimate_low,cost_estimate_high,notes,source,is_active,created_at,updated_at
-15,2,7,Engine Air Filter,30000,36,medium,25,50,Replace more frequently in dusty conditions,Industry Standard,1,2025-07-10 04:12:50.051530,2025-07-10 04:12:50.051533
-17,2,7,Brake Fluid,30000,36,high,70,120,Critical for brake system performance,Industry Standard,1,2025-07-10 04:12:50.051535,2025-07-10 04:12:50.051536
-18,2,7,Coolant/Antifreeze,60000,60,high,100,150,Use manufacturer-specified coolant type,Industry Standard,1,2025-07-10 04:12:50.051536,2025-07-10 04:12:50.051536
-19,2,7,Spark Plugs,60000,60,medium,150,300,Platinum/Iridium plugs last longer,Industry Standard,1,2025-07-10 04:12:50.051537,2025-07-10 04:12:50.051537
-20,2,7,Battery Test,,12,medium,0,20,Most batteries last 3-5 years,Industry Standard,1,2025-07-10 04:12:50.051537,2025-07-10 04:12:50.051538
-21,2,7,Brake Inspection,12000,12,high,0,50,"Visual inspection of pads, rotors, and fluid",Industry Standard,1,2025-07-10 04:12:50.051538,2025-07-10 04:12:50.051538
-22,2,7,Wheel Alignment Check,,12,medium,0,30,Check if vehicle pulls or tires wear unevenly,Industry Standard,1,2025-07-10 04:12:50.051539,2025-07-10 04:12:50.051539
 1,2,12,Engine Oil & Filter,10000,6,high,80,150,15W-40 or 10W-30 diesel oil (13 quarts),Ford Power Stroke Manual,1,2025-07-09 23:53:11.824388,2025-07-09 23:53:11.824393
 2,2,12,Fuel Filter (Primary & Secondary),20000,24,high,100,200,Replace both filters - critical for injector protection,Ford Power Stroke Manual,1,2025-07-09 23:53:11.824395,2025-07-09 23:53:11.824395
 3,2,12,DEF (Diesel Exhaust Fluid),7500,,high,15,30,"Refill when low - typically every 7,500 miles",Ford Power Stroke Manual,1,2025-07-09 23:53:11.824396,2025-07-09 23:53:11.824396
@@ -20,9 +13,3 @@ id,user_id,car_id,service_item,interval_miles,interval_months,priority,cost_esti
 12,2,12,Battery Test,,12,medium,0,20,Most batteries last 3-5 years,Industry Standard,1,2025-07-09 23:53:11.824405,2025-07-09 23:53:11.824405
 13,2,12,Brake Inspection,12000,12,high,0,50,"Visual inspection of pads, rotors, and fluid",Industry Standard,1,2025-07-09 23:53:11.824406,2025-07-09 23:53:11.824406
 14,2,12,Wheel Alignment Check,,12,medium,0,30,Check if vehicle pulls or tires wear unevenly,Industry Standard,1,2025-07-09 23:53:11.824407,2025-07-09 23:53:11.824407
-23,2,13,Engine Air Filter,30000,36,medium,25,50,Replace more frequently in dusty conditions,Industry Standard,1,2025-07-10 14:27:17.510593,2025-07-10 14:27:17.510596
-25,2,13,Brake Fluid,30000,36,high,70,120,Critical for brake system performance,Industry Standard,1,2025-07-10 14:27:17.510598,2025-07-10 14:27:17.510598
-26,2,13,Coolant/Antifreeze,60000,60,high,100,150,Use manufacturer-specified coolant type,Industry Standard,1,2025-07-10 14:27:17.510598,2025-07-10 14:27:17.510599
-28,2,13,Battery Test,,12,medium,0,20,Most batteries last 3-5 years,Industry Standard,1,2025-07-10 14:27:17.510600,2025-07-10 14:27:17.510600
-29,2,13,Brake Inspection,12000,12,high,0,50,"Visual inspection of pads, rotors, and fluid",Industry Standard,1,2025-07-10 14:27:17.510600,2025-07-10 14:27:17.510601
-30,2,13,Wheel Alignment Check,,12,medium,0,30,Check if vehicle pulls or tires wear unevenly,Industry Standard,1,2025-07-10 14:27:17.510601,2025-07-10 14:27:17.510601

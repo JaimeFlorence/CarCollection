@@ -17,3 +17,5 @@ id,user_id,car_id,title,description,status,priority,due_date,created_at,resolved
 16,2,13,Fix Window Shade,"Drivers side, couch window shade is dead.",open,medium,,2025-07-09T23:02:21.679149,
 17,2,13,Replace House Batteries,House Batteries are showing signs of end of life.,open,medium,,2025-07-09T23:02:21.679160,
 18,1,14,Test Todo,Test todo for multi-tenancy,open,high,,2025-07-10 01:14:59.599097,
+19,2,7,Schedule Annual - Minor Service with Mark,Need to get basic annual service done.,open,medium,2025-07-31 00:00:00.000000,2025-07-10 04:23:30.200434,
+20,2,13,Replace Steps,"Steps are wore out.  Keep lubing for now, but will need to be replaced.",open,low,,2025-07-10 15:23:43.290590,

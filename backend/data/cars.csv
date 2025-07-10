@@ -5,12 +5,12 @@ id,user_id,year,make,model,vin,mileage,license_plate,insurance_info,notes,group_
 4,2,1939,Ford,Standard Coupe,,24500,,,This is a bitchin car.,Collector Cars,2025-07-09T23:02:21.676501,2025-07-09T23:02:21.676505
 5,2,1964,Chevrolet,Chevelle 2 Door Wagon,,48500,,,Super bitchin fast car.,Collector Cars,2025-07-09T23:02:21.676519,2025-07-09T23:02:21.676523
 6,2,1996,Porsche,911 (993) Turbo,,45500,,,This is another super fast car,Collector Cars,2025-07-09T23:02:21.676537,2025-07-09T23:02:21.676540
-7,2,1998,Ferrari,355 F1 Berlinetta,,43500,,,I love this car!,Collector Cars,2025-07-09T23:02:21.676553,2025-07-09T23:02:21.676556
+7,2,1998,Ferrari,355 F1 Berlinetta,ZFFXR41A2W0111503,44062,CAK8137,,I love this car!,Collector Cars,2025-07-09T23:02:21.676553,2025-07-10 04:00:58.025851
 8,2,1929,Ford,Roadster Pickup,,24400,,,Old truck.,Collector Cars,2025-07-09T23:02:21.676568,2025-07-09T23:02:21.676571
 9,2,1996,Ford,Ranger Pickup,,175500,,,Old farm truck.,Daily Drivers,2025-07-09T23:02:21.676583,2025-07-09T23:02:21.676586
 10,2,2019,Tesla,Model 3 Performance,,71616,,,Modern electric car,Daily Drivers,2025-07-09T23:02:21.676599,2025-07-09T23:02:21.676602
 11,2,2021,Ford,Expedition,,67155,,,Family SUV,Daily Drivers,2025-07-09T23:02:21.676614,2025-07-09T23:02:21.676616
 12,2,2021,Ford,F-250 Super Duty,1FT8X2BT2MED30930,52535,C38189X,,"Work truck
 VIN: 1FT8X2BT2MED30930",Daily Drivers,2025-07-09T23:02:21.676629,2025-07-10 01:51:43.665328
-13,2,2006,Monaco,Signature,,131231,,,RV for trips,Daily Drivers,2025-07-09T23:02:21.676653,2025-07-09T23:02:21.676656
+13,2,2005,Monaco,Signature,1RF18561851036930,134206,,,RV for trips,Daily Drivers,2025-07-09T23:02:21.676653,2025-07-10 15:11:29.784648
 14,1,2020,Toyota,Camry,TEST123456789,50000,TEST123,Test Insurance,Test car for multi-tenancy,Daily Drivers,2025-07-10 01:14:59.590659,2025-07-10 01:14:59.590662

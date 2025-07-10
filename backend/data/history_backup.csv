@@ -1,0 +1,58 @@
+id,user_id,car_id,service_item,performed_date,mileage,cost,shop,invoice_number,notes,next_due_date,next_due_mileage,created_at
+19,2,12,DEF (Diesel Exhaust Fluid),2025-07-09 00:00:00.000000,,0,,,Filled the DEF.,,,2025-07-10 00:41:21.882509
+1,2,12,Engine Oil & Filter,2025-05-01 00:00:00.000000,50850,190,Valvoline Oil Change Selah,41211,"Premium Blue Extreme Oil Change
+Valvoline Oil Filter VO104
+Valvoline 5W40 Premium Blue
+Extra Oil Charge
+Air Filter Replacement VA512",,,2025-07-09 23:55:26.526057
+2,2,12,Engine Air Filter,2025-05-01 00:00:00.000000,50850,36,Valvoline Oil Change Selah,41211,"Premium Blue Extreme Oil Change
+Valvoline Oil Filter VO104
+Valvoline 5W40 Premium Blue
+Extra Oil Charge
+Air Filter Replacement VA512",,,2025-07-09 23:55:26.539362
+26,2,12,New Tires,2024-12-10 00:00:00.000000,47710,1879.53,Les Schwab,41800624492,"New Winter Tires.
+LT275/65R-18/10 Open Range AT Plus
+Mount & Balance
+VS20 Tire Pressure Monitoring System Rebuild
+Tire Disposal.",,,2025-07-10 01:33:00.134226
+27,2,12,Wheel Alignment Check,2024-12-10 00:00:00.000000,47710,0,Les Schwab,41800624492,"New Winter Tires.
+LT275/65R-18/10 Open Range AT Plus
+Mount & Balance
+VS20 Tire Pressure Monitoring System Rebuild
+Tire Disposal.",,,2025-07-10 01:45:33.122221
+3,2,12,Engine Oil & Filter,2023-06-05 00:00:00.000000,35352,62.13,Pingrey Ford,46329,"Inspection and service.
+KIT - Element
+Motorcraft SAE 10W-30 (13q)
+Exhaust Emissi...",,,2025-07-10 00:02:20.423301
+4,2,12,Cabin Air Filter,2023-06-05 00:00:00.000000,35352,37.55,Pingrey Ford,46329,"Inspection and service.
+KIT - Element
+Motorcraft SAE 10W-30 (13q)
+Exhaust Emissi...",,,2025-07-10 00:02:20.443613
+5,2,12,Battery Test,2023-06-05 00:00:00.000000,35352,0,Pingrey Ford,46329,"Inspection and service.
+KIT - Element
+Motorcraft SAE 10W-30 (13q)
+Exhaust Emissi...",,,2025-07-10 00:02:20.453245
+6,2,12,Brake Inspection,2023-06-05 00:00:00.000000,35352,0,Pingrey Ford,46329,"Inspection and service.
+KIT - Element
+Motorcraft SAE 10W-30 (13q)
+Exhaust Emissi...",,,2025-07-10 00:02:20.461053
+11,2,12,Engine Oil & Filter,2022-08-14 00:00:00.000000,27640,156.43,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.333953
+12,2,12,Fuel Filter (Primary & Secondary),2022-08-14 00:00:00.000000,27640,213.09,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.347549
+13,2,12,DEF (Diesel Exhaust Fluid),2022-08-14 00:00:00.000000,27640,34.99,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.355211
+14,2,12,Tire Rotation,2022-08-14 00:00:00.000000,27640,0,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.362217
+15,2,12,Engine Air Filter,2022-08-14 00:00:00.000000,27640,55.64,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.369021
+16,2,12,Cabin Air Filter,2022-08-14 00:00:00.000000,27640,31.94,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.375169
+17,2,12,Battery Test,2022-08-14 00:00:00.000000,27640,0,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.381429
+18,2,12,Brake Inspection,2022-08-14 00:00:00.000000,27640,0,Pingrey Ford,41609,Buncha Shit.,,,2025-07-10 00:34:54.388413
+20,2,12,Engine Oil & Filter,2022-01-26 00:00:00.000000,18857,167.08,Pingrey Ford,34838,"Oil & Filter.
+Rotate Tires.
+Software Update.",,,2025-07-10 01:19:25.978962
+25,2,12,New Tires and Wheels for Winter,2021-11-18 00:00:00.000000,15000,3339.42,Les Schwab,41800466147,"4x - 18x9 8-170 XD847 Wheels
+4x - LT275/65R/18-18/10 123/120S Back Country AT2 tires.
+Mounted and Balanced
+33560 (B) EZ Go Tire Pressure Monitoring System Sensors
+32x - Lug Nuts.",,,2025-07-10 01:29:28.744514
+21,2,12,Engine Oil & Filter,2021-10-06 00:00:00.000000,11858,111.57,Pingrey Ford,33008,"Oil, Filter, and DEF.",,,2025-07-10 01:22:23.023551
+22,2,12,DEF (Diesel Exhaust Fluid),2021-10-06 00:00:00.000000,11858,27.86,Pingrey Ford,33008,"Oil, Filter, and DEF.",,,2025-07-10 01:22:23.039606
+23,2,12,Engine Oil & Filter,2021-08-30 00:00:00.000000,7394,109.17,Pingrey Ford,32329,Oil change and tire rotation.,,,2025-07-10 01:24:53.390897
+24,2,12,Tire Rotation,2021-08-30 00:00:00.000000,7394,0,Pingrey Ford,32329,Oil change and tire rotation.,,,2025-07-10 01:24:53.439853

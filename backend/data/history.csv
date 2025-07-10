@@ -1,4 +1,86 @@
 id,user_id,car_id,service_item,performed_date,mileage,cost,shop,invoice_number,notes,next_due_date,next_due_mileage,created_at
+29,2,7,Repair from Canyon Rock,2024-06-19 00:00:00.000000,43068,26415.38,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:05:03.093994
+31,2,7,Engine Air Filter,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.654207
+32,2,7,Cabin Air Filter,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.661651
+33,2,7,Brake Fluid,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.669581
+34,2,7,Coolant/Antifreeze,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.676202
+35,2,7,Spark Plugs,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.683781
+36,2,7,Battery Test,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.689869
+37,2,7,Brake Inspection,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.697306
+38,2,7,Wheel Alignment Check,2024-06-19 00:00:00.000000,43068,0,Seven Lakes Motorsports,2478,"Major Repairs from rock in the canyon.
+10 qts - 5w40.
+Oil Filter
+2 Gallons - Engine Coolant",,,2025-07-10 04:13:21.703662
+30,2,7,Major Service,2024-03-10 00:00:00.000000,41912,44575.04,Seven Lakes Motorsports,2450,"Major, engine out service.
+Rebuilt dual mass flywheel
+Replace Input Shaft
+Replace Clutch
+Replace Gearbox and Engine Mount
+Replace RH Axle Seal, CV Boots.
+New Battery.
+New Thermostat.
+New Coolant Lines.
+Rebuild Waterpump.
+Change Gearbox Oil.
+Change Engine Oil & Filter.
+Replace All Accessory Belts.
+Retime Camshafts.
+Replace Timing Belts and Tensioner Bearings.",,,2025-07-10 04:12:30.709482
+39,2,7,Brake Fluid,2021-12-29 00:00:00.000000,36437,23443.19,Seven Lakes Motorsports,,"New Power Steering Reservoir.
+New Fuse Box.
+Rebuild All Four Shocks.
+New Radiator Fans (both sides).
+New F360 F1 Pump.
+New Fuel Filter.",,,2025-07-10 05:00:18.427284
+40,2,7,Coolant/Antifreeze,2021-12-29 00:00:00.000000,36437,0,Seven Lakes Motorsports,,"New Power Steering Reservoir.
+New Fuse Box.
+Rebuild All Four Shocks.
+New Radiator Fans (both sides).
+New F360 F1 Pump.
+New Fuel Filter.",,,2025-07-10 05:00:18.443903
+41,2,7,Spark Plugs,2021-12-29 00:00:00.000000,36437,0,Seven Lakes Motorsports,,"New Power Steering Reservoir.
+New Fuse Box.
+Rebuild All Four Shocks.
+New Radiator Fans (both sides).
+New F360 F1 Pump.
+New Fuel Filter.",,,2025-07-10 05:00:18.451741
+42,2,7,Battery Test,2021-12-29 00:00:00.000000,36437,0,Seven Lakes Motorsports,,"New Power Steering Reservoir.
+New Fuse Box.
+Rebuild All Four Shocks.
+New Radiator Fans (both sides).
+New F360 F1 Pump.
+New Fuel Filter.",,,2025-07-10 05:00:18.458431
+43,2,7,Brake Inspection,2021-12-29 00:00:00.000000,36437,0,Seven Lakes Motorsports,,"New Power Steering Reservoir.
+New Fuse Box.
+Rebuild All Four Shocks.
+New Radiator Fans (both sides).
+New F360 F1 Pump.
+New Fuel Filter.",,,2025-07-10 05:00:18.467311
+28,2,11,"Oil Change, Tire Rotation",2025-07-09 00:00:00.000000,,18,Pingrey Ford,999999,,,,2025-07-10 03:12:20.640038
 19,2,12,DEF (Diesel Exhaust Fluid),2025-07-09 00:00:00.000000,,0,,,Filled the DEF.,,,2025-07-10 00:41:21.882509
 1,2,12,Engine Oil & Filter,2025-05-01 00:00:00.000000,50850,190,Valvoline Oil Change Selah,41211,"Premium Blue Extreme Oil Change
 Valvoline Oil Filter VO104
@@ -56,3 +138,15 @@ Mounted and Balanced
 22,2,12,DEF (Diesel Exhaust Fluid),2021-10-06 00:00:00.000000,11858,27.86,Pingrey Ford,33008,"Oil, Filter, and DEF.",,,2025-07-10 01:22:23.039606
 23,2,12,Engine Oil & Filter,2021-08-30 00:00:00.000000,7394,109.17,Pingrey Ford,32329,Oil change and tire rotation.,,,2025-07-10 01:24:53.390897
 24,2,12,Tire Rotation,2021-08-30 00:00:00.000000,7394,0,Pingrey Ford,32329,Oil change and tire rotation.,,,2025-07-10 01:24:53.439853
+44,2,13,Coolant Hose Repair,2025-06-29 00:00:00.000000,,700.7,Tough Truck,0001650,"Replaced a couple of coolant hoses, as we sprung a leak going to Napa for Andrea Bocelli.",,,2025-07-10 14:32:47.478695
+45,2,13,Coolant/Antifreeze,2025-06-29 00:00:00.000000,,0,Tough Truck,0001650,"Replaced a couple of coolant hoses, as we sprung a leak going to Napa for Andrea Bocelli.",,,2025-07-10 14:32:47.493920
+46,2,13,Hydraulic Hose Replacement,2025-03-28 00:00:00.000000,,828.5,Tough Truck,0001650,"Replace hydraulic hoses to tranny cooler.  
+Replace one return oil hose.
+Reseal a couple of coolant hoses.",,,2025-07-10 14:38:23.094706
+47,2,13,RV Service,2024-11-05 00:00:00.000000,128369,2290.78,Cascade Diesel,0095266,"Serviced Aquahot.  Installed new Fan Motor and Limit Switch.
+Cleaned connection for alarm switch to air tank.
+Lubed Steps.
+New Serpentine Belt and Tensioner.
+Replaced Alternator Fan (to correct spacing).
+Replaced House Water Filter (High Flow).
+Added steel bracket and large mud flap to help protect the radiator.",,,2025-07-10 15:32:32.542701
