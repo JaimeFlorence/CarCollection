@@ -210,3 +210,4 @@ class ApiServiceAxios {
 }
 
 export const apiServiceAxios = new ApiServiceAxios();
+export const apiAxios = axiosClient; // Export axios instance for direct use
