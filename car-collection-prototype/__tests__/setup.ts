@@ -12,6 +12,11 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+// Mock ProtectedRoute to pass through children
+jest.mock('@/components/ProtectedRoute', () => ({
+  ProtectedRoute: ({ children }: any) => children,
+}));
+
 // Mock localStorage
 const localStorageMock = {
   getItem: jest.fn(),

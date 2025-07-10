@@ -489,3 +489,64 @@ See "HIGH PRIORITY - Testing Suite Expansion" section above for detailed roadmap
 
 **Last Updated**: January 10, 2025
 **Next Sprint Planning**: Test Coverage Expansion (Phase 1 - Critical Business Logic)
+
+---
+
+## 🆕 New Feature Implemented - January 10, 2025 (Evening Session)
+
+### ✅ XML Data Export/Import/Clear System
+Implemented a complete backup and restore system with XML format:
+
+1. **Export Functionality** ✅
+   - Export all user data to XML file
+   - Includes cars, service intervals, service history, and todos
+   - Pretty-formatted XML with metadata
+   - Timestamped filename for easy organization
+
+2. **Clear Data Functionality** ✅
+   - Safely delete all user data (cars, todos, service records)
+   - Requires typing "DELETE" to confirm
+   - User account remains active
+   - Respects foreign key constraints
+
+3. **Import Functionality** ✅
+   - Upload and restore from XML backup
+   - Validates XML structure and version
+   - Maps old IDs to new IDs during import
+   - Transaction-based (all or nothing)
+
+4. **UI Integration** ✅
+   - Added to Admin page under User Management
+   - New DataManagement component
+   - Clear warning messages and confirmations
+   - Success/error feedback
+
+### Files Created/Modified:
+- `/src/components/DataManagement.tsx` - NEW - Frontend component
+- `/src/app/admin/page.tsx` - Added DataManagement section
+- `/src/lib/apiAxios.ts` - Added data management endpoints
+- `/backend/app/data_management.py` - NEW - Backend endpoints
+- `/backend/app/main.py` - Added data_management router
+- `/backend/app/crud.py` - Added create_service_interval and create_service_history
+
+### XML Format Example:
+```xml
+<CarCollectionBackup version="1.0">
+  <Metadata>
+    <ExportDate>2025-01-10T22:30:00Z</ExportDate>
+    <Username>jaime</Username>
+    <AppVersion>2.4</AppVersion>
+    <RecordCounts>
+      <Cars>3</Cars>
+      <ServiceRecords>45</ServiceRecords>
+      <Todos>12</Todos>
+    </RecordCounts>
+  </Metadata>
+  <!-- Full data structure -->
+</CarCollectionBackup>
+```
+
+---
+
+**Last Updated**: January 10, 2025 (Evening)
+**Next Steps**: Test the full backup/clear/restore cycle

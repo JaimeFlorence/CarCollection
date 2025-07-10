@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { User, UserCreateByAdmin, apiService } from '@/lib/api';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Header } from '@/components/Header';
+import { DataManagement } from '@/components/DataManagement';
 
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -180,6 +181,11 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+
+            {/* Data Management Section */}
+            <div className="mt-8">
+              <DataManagement />
+            </div>
 
             {showCreateForm && (
               <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">

@@ -149,4 +149,20 @@ def delete_todo(db: Session, todo_id: int, user_id: int) -> bool:
         return False
     db.delete(db_todo)
     db.commit()
-    return True 
+    return True
+
+# Service Interval CRUD operations
+def create_service_interval(db: Session, interval: schemas.ServiceIntervalCreate, user_id: int) -> models.ServiceInterval:
+    db_interval = models.ServiceInterval(**interval.model_dump(), user_id=user_id)
+    db.add(db_interval)
+    db.commit()
+    db.refresh(db_interval)
+    return db_interval
+
+# Service History CRUD operations
+def create_service_history(db: Session, service: schemas.ServiceHistoryCreate, user_id: int) -> models.ServiceHistory:
+    db_service = models.ServiceHistory(**service.model_dump(), user_id=user_id)
+    db.add(db_service)
+    db.commit()
+    db.refresh(db_service)
+    return db_service 

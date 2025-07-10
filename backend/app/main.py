@@ -8,6 +8,7 @@ from .auth import (
     get_current_admin_user, update_last_login
 )
 from .service_api import router as service_router
+from .data_management import router as data_router
 from typing import List
 from datetime import timedelta
 
@@ -17,6 +18,8 @@ app = FastAPI(title="Car Collection API")
 
 # Include service API routes
 app.include_router(service_router, prefix="/api")
+# Include data management routes
+app.include_router(data_router)
 
 # Allow frontend dev server
 app.add_middleware(

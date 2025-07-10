@@ -164,6 +164,41 @@ class ApiServiceAxios {
     await axiosClient.delete(`/api/service-history/${serviceId}`);
   }
 
+  // Data Management endpoints
+  async exportData(options?: {
+    includeCars?: boolean;
+    includeTodos?: boolean;
+    includeServiceIntervals?: boolean;
+    includeServiceHistory?: boolean;
+  }): Promise<any> {
+    const params = new URLSearchParams();
+    if (options) {
+      params.append('include_cars', String(options.includeCars ?? true));
+      params.append('include_todos', String(options.includeTodos ?? true));
+      params.append('include_service_intervals', String(options.includeServiceIntervals ?? true));
+      params.append('include_service_history', String(options.includeServiceHistory ?? true));
+    }
+    
+    const response = await axiosClient.post(`/data/export?${params.toString()}`, {}, {
+      responseType: 'text'  // Important: XML response as text
+    });
+    return response;  // Return full response so we can access response.data
+  }
+
+  async importData(formData: FormData): Promise<any> {
+    const response = await axiosClient.post('/data/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
+  async clearAllData(): Promise<any> {
+    const response = await axiosClient.delete('/data/clear-all');
+    return response.data;
+  }
+
   // Token management (exposed for compatibility)
   setToken(token: string | null) {
     tokenManager.setToken(token);
