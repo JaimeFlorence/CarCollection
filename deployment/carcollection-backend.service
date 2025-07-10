@@ -1,0 +1,30 @@
+[Unit]
+Description=Car Collection Backend (FastAPI)
+After=network.target postgresql.service
+
+[Service]
+Type=exec
+User=carcollection
+Group=carcollection
+WorkingDirectory=/opt/carcollection/backend
+Environment="PATH=/opt/carcollection/backend/venv/bin"
+ExecStart=/opt/carcollection/backend/venv/bin/gunicorn app.main:app \
+    --bind 127.0.0.1:8000 \
+    --workers 4 \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --log-level info \
+    --access-logfile /var/log/carcollection/backend-access.log \
+    --error-logfile /var/log/carcollection/backend-error.log
+
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/carcollection/backend /var/log/carcollection
+
+[Install]
+WantedBy=multi-user.target

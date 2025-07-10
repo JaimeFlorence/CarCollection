@@ -14,11 +14,12 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import User
 from .schemas import TokenData
+from .config import settings
 
-# Configuration
-SECRET_KEY = "your-secret-key-here-change-in-production"  # TODO: Move to environment variables
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 240  # 4 hours
+# Configuration from environment
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.jwt_algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.jwt_expiration_hours * 60
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -9,22 +9,30 @@ from .auth import (
 )
 from .service_api import router as service_router
 from .data_management import router as data_router
+from .invitation_api import router as invitation_router
+from .config import settings
 from typing import List
 from datetime import timedelta
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Car Collection API")
+app = FastAPI(
+    title="Car Collection API",
+    docs_url="/api/docs" if settings.debug else None,
+    redoc_url="/api/redoc" if settings.debug else None
+)
 
 # Include service API routes
 app.include_router(service_router, prefix="/api")
 # Include data management routes
 app.include_router(data_router)
+# Include invitation routes
+app.include_router(invitation_router)
 
-# Allow frontend dev server
+# Configure CORS based on environment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,6 +63,13 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
 
 @app.post("/auth/register", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Check if registration is allowed
+    if not settings.allow_registration:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Public registration is disabled. Please contact an administrator for an invitation."
+        )
+    
     # Check if username already exists
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:

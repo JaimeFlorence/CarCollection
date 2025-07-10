@@ -2,18 +2,18 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from "react";
-import { apiService, ToDo, ServiceInterval, ServiceIntervalCreate, ServiceHistory } from "../../../lib/api";
-import { DEFAULT_SERVICE_INTERVALS } from "../../../lib/defaultServiceIntervals";
-import ToDosTab from "../../../components/ToDosTab";
-import ServiceIntervalList from "../../../components/ServiceIntervalList";
-import ServiceIntervalEditModal from "../../../components/ServiceIntervalEditModal";
-import ServiceIntervalAddModal from "../../../components/ServiceIntervalAddModal";
-import ServiceHistoryTable from "../../../components/ServiceHistoryTable";
-import ServiceEntryDialog from "../../../components/ServiceEntryDialog";
-import EngineTypeDialog from "../../../components/EngineTypeDialog";
-import ConfirmDialog from "../../../components/ConfirmDialog";
-import { ProtectedRoute } from "../../../components/ProtectedRoute";
-import { Header } from "../../../components/Header";
+import { apiService, ToDo, ServiceInterval, ServiceIntervalCreate, ServiceHistory } from "@/lib/api";
+import { DEFAULT_SERVICE_INTERVALS } from "@/lib/defaultServiceIntervals";
+import ToDosTab from "@/components/ToDosTab";
+import ServiceIntervalList from "@/components/ServiceIntervalList";
+import ServiceIntervalEditModal from "@/components/ServiceIntervalEditModal";
+import ServiceIntervalAddModal from "@/components/ServiceIntervalAddModal";
+import ServiceHistoryTable from "@/components/ServiceHistoryTable";
+import ServiceEntryDialog from "@/components/ServiceEntryDialog";
+import EngineTypeDialog from "@/components/EngineTypeDialog";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Header } from "@/components/Header";
 import React from "react";
 
 // Placeholder for fetching car data (replace with real API call later)

@@ -5,6 +5,7 @@ import { User, UserCreateByAdmin, apiService } from '@/lib/api';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Header } from '@/components/Header';
 import { DataManagement } from '@/components/DataManagement';
+import { InvitationManagement } from '@/components/InvitationManagement';
 
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -181,6 +182,11 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+
+            {/* Invitation Management Section */}
+            <div className="mt-8">
+              <InvitationManagement />
+            </div>
 
             {/* Data Management Section */}
             <div className="mt-8">

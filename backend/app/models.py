@@ -136,4 +136,21 @@ class ServiceResearchLog(Base):
     intervals_found = Column(Integer, default=0)
     success_rate = Column(Numeric(5, 2), nullable=True)
     errors = Column(Text, nullable=True)  # JSON string of errors
-    created_at = Column(DateTime, default=lambda: datetime.now(UTC)) 
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
+
+
+class UserInvitation(Base):
+    __tablename__ = "user_invitations"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False, index=True)
+    token = Column(String, unique=True, nullable=False, index=True)
+    invited_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_admin = Column(Boolean, default=False)
+    used = Column(Boolean, default=False)
+    used_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
+    
+    # Relationships
+    invited_by = relationship("User", foreign_keys=[invited_by_id])
+    used_by = relationship("User", foreign_keys=[used_by_id]) 
