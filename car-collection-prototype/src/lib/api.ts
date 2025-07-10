@@ -243,6 +243,14 @@ class ApiService {
     this.setToken(null);
   }
 
+  async refreshToken(): Promise<AuthResponse> {
+    const response = await this.request<AuthResponse>('/auth/refresh', {
+      method: 'POST',
+    });
+    this.setToken(response.access_token);
+    return response;
+  }
+
   // Admin endpoints
   async getUsers(): Promise<User[]> {
     return this.request<User[]>('/admin/users/');
@@ -395,4 +403,6 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService(); 
+// Export the axios-based service as the main apiService
+import { apiServiceAxios } from './apiAxios';
+export const apiService = apiServiceAxios; 

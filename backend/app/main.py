@@ -43,7 +43,8 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     # Update last login
     update_last_login(db, user)
     
-    access_token_expires = timedelta(minutes=30)
+    from .auth import ACCESS_TOKEN_EXPIRE_MINUTES
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
@@ -66,6 +67,26 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 @app.get("/auth/me", response_model=schemas.UserOut)
 def read_users_me(current_user: models.User = Depends(get_current_active_user)):
     return current_user
+
+@app.post("/auth/refresh", response_model=schemas.Token)
+def refresh_token(
+    current_user: models.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Refresh the access token for the current user.
+    This endpoint can be called to get a new token before the current one expires.
+    """
+    from .auth import ACCESS_TOKEN_EXPIRE_MINUTES
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": current_user.username}, expires_delta=access_token_expires
+    )
+    
+    # Update last login time on refresh
+    update_last_login(db, current_user)
+    
+    return {"access_token": access_token, "token_type": "bearer", "user": current_user}
 
 # Admin Endpoints
 @app.post("/admin/users/", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)

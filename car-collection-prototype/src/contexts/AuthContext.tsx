@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, UserLogin, UserCreate, apiService } from '@/lib/api';
+import { SessionManager } from '@/components/SessionManager';
 
 interface AuthContextType {
   user: User | null;
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={value}>
       {children}
+      {!loading && <SessionManager />}
     </AuthContext.Provider>
   );
 }

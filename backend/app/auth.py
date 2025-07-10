@@ -18,7 +18,7 @@ from .schemas import TokenData
 # Configuration
 SECRET_KEY = "your-secret-key-here-change-in-production"  # TODO: Move to environment variables
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 240  # 4 hours
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
