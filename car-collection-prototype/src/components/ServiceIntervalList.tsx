@@ -102,24 +102,11 @@ export default function ServiceIntervalList({
         const today = new Date();
         const serviceDay = new Date(serviceDate);
         
-        // Debug logging
-        console.log('Service date calculation debug:');
-        console.log('- Raw serviceDate:', serviceDate);
-        console.log('- serviceDay object:', serviceDay);
-        console.log('- today object:', today);
-        console.log('- serviceDay ISO:', serviceDay.toISOString());
-        console.log('- today ISO:', today.toISOString());
-        
         // Compare dates by setting time to midnight to avoid timezone issues
         const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const serviceMidnight = new Date(serviceDay.getFullYear(), serviceDay.getMonth(), serviceDay.getDate());
         
-        console.log('- todayMidnight:', todayMidnight);
-        console.log('- serviceMidnight:', serviceMidnight);
-        
         const daysSinceService = Math.floor((todayMidnight.getTime() - serviceMidnight.getTime()) / (1000 * 60 * 60 * 24));
-        
-        console.log('- daysSinceService:', daysSinceService);
         
         if (daysSinceService === 0) {
           lastServiceText = 'Done today';
@@ -337,8 +324,9 @@ export default function ServiceIntervalList({
         <h2 className="text-xl font-semibold text-slate-900">Service Schedule</h2>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-700">Group by:</label>
+            <label htmlFor="groupBy" className="text-sm font-medium text-slate-700">Group by:</label>
             <select
+              id="groupBy"
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value as 'system' | 'priority' | 'none')}
               className="px-3 py-1 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

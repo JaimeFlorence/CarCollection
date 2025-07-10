@@ -353,17 +353,28 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
           );
           
           // Create a service history entry for each selected interval
+          console.log(`Creating service history for ${selectedIntervals.length} intervals`);
+          
           for (let i = 0; i < selectedIntervals.length; i++) {
             const interval = selectedIntervals[i];
             // Find the cost for this specific interval
             const intervalCost = intervalCosts?.find(ic => ic.intervalId === interval.id)?.cost || 0;
             
-            await apiService.createServiceHistory(Number(id), {
-              car_id: Number(id),
-              ...serviceData,
-              cost: intervalCost, // Use the specific cost for this interval
-              service_item: interval.service_item // Use the interval's exact name
-            } as any);
+            console.log(`Creating service ${i + 1}/${selectedIntervals.length}: ${interval.service_item} - Cost: $${intervalCost}`);
+            
+            try {
+              await apiService.createServiceHistory(Number(id), {
+                car_id: Number(id),
+                ...serviceData,
+                cost: intervalCost, // Use the specific cost for this interval
+                service_item: interval.service_item // Use the interval's exact name
+              } as any);
+              
+              console.log(`Successfully created service history for: ${interval.service_item}`);
+            } catch (error) {
+              console.error(`Failed to create service history for ${interval.service_item}:`, error);
+              throw new Error(`Failed to save service "${interval.service_item}". ${error.message || error}`);
+            }
           }
         } else {
           // No intervals selected, just create one entry with the user's description

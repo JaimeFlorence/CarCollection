@@ -131,9 +131,10 @@ export default function ServiceEntryDialog({
       
       await onSave(serviceData, selectedIntervals, intervalCostData);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save service:', error);
-      alert('Failed to save service record. Please try again.');
+      const errorMessage = error.message || 'Failed to save service record. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -398,20 +399,20 @@ export default function ServiceEntryDialog({
                     </div>
                   ))}
                 </div>
-                {selectedIntervals.length > 0 && (
-                  <div className="mt-3 p-3 bg-slate-50 rounded-lg">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Sum of service items:</span>
-                      <span className="font-medium">${calculateIntervalCostsSum().toFixed(2)}</span>
-                    </div>
-                    {formData.cost && (
-                      <div className="flex justify-between text-sm mt-1">
-                        <span className="text-slate-600">Invoice total:</span>
-                        <span className="font-medium">${parseFloat(formData.cost).toFixed(2)}</span>
-                      </div>
-                    )}
+              )}
+              {selectedIntervals.length > 0 && (
+                <div className="mt-3 p-3 bg-slate-50 rounded-lg">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-600">Sum of service items:</span>
+                    <span className="font-medium">${calculateIntervalCostsSum().toFixed(2)}</span>
                   </div>
-                )}
+                  {formData.cost && (
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-slate-600">Invoice total:</span>
+                      <span className="font-medium">${parseFloat(formData.cost).toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}
