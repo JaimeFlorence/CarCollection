@@ -1,0 +1,15 @@
+id,user_id,car_id,service_item,interval_miles,interval_months,priority,cost_estimate_low,cost_estimate_high,notes,source,is_active,created_at,updated_at
+1,2,12,Engine Oil & Filter,10000,6,high,80,150,15W-40 or 10W-30 diesel oil (13 quarts),Ford Power Stroke Manual,1,2025-07-09 23:53:11.824388,2025-07-09 23:53:11.824393
+2,2,12,Fuel Filter (Primary & Secondary),20000,24,high,100,200,Replace both filters - critical for injector protection,Ford Power Stroke Manual,1,2025-07-09 23:53:11.824395,2025-07-09 23:53:11.824395
+3,2,12,DEF (Diesel Exhaust Fluid),7500,,high,15,30,"Refill when low - typically every 7,500 miles",Ford Power Stroke Manual,1,2025-07-09 23:53:11.824396,2025-07-09 23:53:11.824396
+4,2,12,EGR Valve Cleaning,50000,,medium,200,400,Prevents carbon buildup and expensive repairs,Ford Diesel Specialist,1,2025-07-09 23:53:11.824397,2025-07-09 23:53:11.824398
+5,2,12,Tire Rotation,7500,6,medium,30,60,,Ford Scheduled Maintenance,1,2025-07-09 23:53:11.824398,2025-07-09 23:53:11.824399
+6,2,12,Transmission Fluid,150000,,high,200,400,Mercon LV fluid required,Ford Truck Manual,1,2025-07-09 23:53:11.824399,2025-07-09 23:53:11.824399
+7,2,12,Engine Air Filter,30000,36,medium,25,50,Replace more frequently in dusty conditions,Industry Standard,1,2025-07-09 23:53:11.824400,2025-07-09 23:53:11.824400
+8,2,12,Cabin Air Filter,15000,12,low,25,60,,Industry Standard,1,2025-07-09 23:53:11.824401,2025-07-09 23:53:11.824401
+9,2,12,Brake Fluid,30000,36,high,70,120,Critical for brake system performance,Industry Standard,1,2025-07-09 23:53:11.824402,2025-07-09 23:53:11.824402
+10,2,12,Coolant/Antifreeze,60000,60,high,100,150,Use manufacturer-specified coolant type,Industry Standard,1,2025-07-09 23:53:11.824403,2025-07-09 23:53:11.824403
+11,2,12,Spark Plugs,100000,120,medium,150,300,Platinum/Iridium plugs last longer,Industry Standard,1,2025-07-09 23:53:11.824404,2025-07-09 23:53:11.824404
+12,2,12,Battery Test,,12,medium,0,20,Most batteries last 3-5 years,Industry Standard,1,2025-07-09 23:53:11.824405,2025-07-09 23:53:11.824405
+13,2,12,Brake Inspection,12000,12,high,0,50,"Visual inspection of pads, rotors, and fluid",Industry Standard,1,2025-07-09 23:53:11.824406,2025-07-09 23:53:11.824406
+14,2,12,Wheel Alignment Check,,12,medium,0,30,Check if vehicle pulls or tires wear unevenly,Industry Standard,1,2025-07-09 23:53:11.824407,2025-07-09 23:53:11.824407

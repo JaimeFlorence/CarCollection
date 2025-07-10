@@ -344,6 +344,44 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
       if (editingService) {
         // Update existing service
         await apiService.updateServiceHistory(editingService.id, serviceData);
+        
+        // If intervals were selected, we need to create new service history entries for them
+        // (except for the one we just updated if it matches)
+        if (selectedIntervalIds && selectedIntervalIds.length > 0) {
+          const selectedIntervals = serviceIntervals.filter(interval => 
+            selectedIntervalIds.includes(interval.id)
+          );
+          
+          console.log(`Updating service with ${selectedIntervals.length} selected intervals`);
+          
+          for (let i = 0; i < selectedIntervals.length; i++) {
+            const interval = selectedIntervals[i];
+            
+            // Skip if this interval matches the service we just updated
+            if (interval.service_item === editingService.service_item) {
+              console.log(`Skipping ${interval.service_item} - already updated`);
+              continue;
+            }
+            
+            const intervalCost = intervalCosts?.find(ic => ic.intervalId === interval.id)?.cost || 0;
+            
+            console.log(`Creating additional service: ${interval.service_item} - Cost: $${intervalCost}`);
+            
+            try {
+              await apiService.createServiceHistory(Number(id), {
+                car_id: Number(id),
+                ...serviceData,
+                cost: intervalCost,
+                service_item: interval.service_item
+              } as any);
+              
+              console.log(`Successfully created service history for: ${interval.service_item}`);
+            } catch (error) {
+              console.error(`Failed to create service history for ${interval.service_item}:`, error);
+              throw new Error(`Failed to save service "${interval.service_item}". ${error.message || error}`);
+            }
+          }
+        }
       } else {
         // If intervals were selected, create a service history entry for each one
         if (selectedIntervalIds && selectedIntervalIds.length > 0) {

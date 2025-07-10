@@ -45,6 +45,7 @@ export interface Car {
   make: string;
   model: string;
   year: number;
+  vin?: string;
   mileage: number;
   license_plate?: string;
   insurance_info?: string;
@@ -58,6 +59,7 @@ export interface CarCreate {
   make: string;
   model: string;
   year: number;
+  vin?: string;
   mileage: number;
   license_plate?: string;
   insurance_info?: string;

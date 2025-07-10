@@ -25,7 +25,7 @@
   - [x] Smart vehicle detection for engine variants
   - [x] Confidence scoring based on data source
 
-### ✅ Recently Fixed Issues (January 9, 2025)
+### ✅ Recently Fixed Issues (January 9-10, 2025)
 - [x] **Date Display Bug** ✅ FIXED
   - [x] "Done today" now displays correctly
   - [x] Timezone/date precision issue resolved
@@ -38,6 +38,17 @@
   - [x] Implemented individual cost entry for each service item
   - [x] Invoice total can differ from sum of items
   - [x] Each service interval tracks its own cost
+- [x] **ServiceEntryDialog JSX Syntax Error** ✅ FIXED (January 10)
+  - [x] Corrected mismatched parentheses in conditional rendering
+  - [x] Build error resolved
+- [x] **Service Update Checkbox Bug** ✅ FIXED (January 10)
+  - [x] Checkboxes now save properly when updating service records
+  - [x] Pre-selection of related services when editing
+  - [x] New services are created for newly checked intervals
+- [x] **VIN Field Addition** ✅ COMPLETED (January 10)
+  - [x] Added VIN field to car creation form
+  - [x] Added VIN field to car edit form
+  - [x] VIN displays in Vehicle Overview panel
 
 ### 🟢 High Priority (User Priority #1) - COMPLETED
 - [x] **Multi-Tenancy Implementation** ✅ (Completed: July 7, 2024)
@@ -100,8 +111,13 @@
    - [x] Summary statistics (total cost, average, etc.)
    - [x] Sort by date/mileage/cost implemented
 
-#### 🔴 Immediate Priority - Enhanced Cost Tracking
-1. **Parts/Labor/Tax Breakdown** 🚀 NEXT
+#### 🔴 Immediate Priority - Data Management & Testing
+1. **Data Export/Import Tools** ✅ COMPLETED (January 10)
+   - [x] Created export_all_data.py script
+   - [x] Exports cars, todos, service intervals, and history to CSV
+   - [x] Preserves test data for future use
+   
+2. **Enhanced Cost Tracking** 🚀 NEXT
    - [ ] Add parts_cost, labor_cost, tax fields to ServiceHistory model
    - [ ] Update ServiceHistoryCreate/Update schemas
    - [ ] Modify ServiceEntryDialog to show breakdown fields
@@ -277,25 +293,32 @@
 
 ---
 
-## 📂 Key Files Modified Today (January 9, 2025)
+## 📂 Key Files Modified (January 9-10, 2025)
 
-### Frontend Components
+### January 9, 2025
 - `/src/components/ServiceIntervalList.tsx` - Progress calculation from service history
 - `/src/components/ServiceEntryDialog.tsx` - Individual cost entry per service item
 - `/src/components/ServiceHistoryTable.tsx` - Grouping, sorting, summary stats
 - `/src/app/cars/[id]/page.tsx` - Fixed integration issues, cost handling
-
-### Backend Services
 - `/backend/app/service_api.py` - Service history endpoints (already implemented)
 - `/backend/app/models.py` - ServiceHistory model with shop, invoice fields
 - `/backend/app/schemas.py` - ServiceHistory schemas
 
+### January 10, 2025
+- `/src/components/ServiceEntryDialog.tsx` - Fixed JSX syntax, added checkbox pre-selection
+- `/src/app/cars/[id]/page.tsx` - Enhanced update logic for multiple services
+- `/src/components/ServiceIntervalList.tsx` - Removed debug logging
+- `/src/components/CarForm.tsx` - Added VIN input field
+- `/src/lib/api.ts` - Added VIN to Car and CarCreate interfaces
+- `/backend/export_all_data.py` - Created comprehensive data export script
+
 ### Scripts & Configuration
 - `/car-collection-prototype/reset_and_setup.py` - Enhanced with prerequisites check, backup
 - `/car-collection-prototype/import_data_sqlite.py` - Service intervals generation disabled
-- Database: Clean with cars/todos only, no service intervals
+- `/backend/export_all_data.py` - Exports cars, todos, schedules, and history to CSV
+- Database: Contains test data with service history and intervals
 
 ---
 
-**Last Updated**: January 9, 2025
-**Next Sprint Planning**: Ready for next phase
+**Last Updated**: January 10, 2025
+**Next Sprint Planning**: Enhanced Cost Tracking & Analytics Dashboard

@@ -15,6 +15,7 @@ export default function CarForm({ car, onSubmit, onCancel, loading = false }: Ca
     make: '',
     model: '',
     year: new Date().getFullYear(),
+    vin: '',
     mileage: 0,
     license_plate: '',
     insurance_info: '',
@@ -32,6 +33,7 @@ export default function CarForm({ car, onSubmit, onCancel, loading = false }: Ca
         make: car.make,
         model: car.model,
         year: car.year,
+        vin: car.vin || '',
         mileage: car.mileage,
         license_plate: car.license_plate || '',
         insurance_info: car.insurance_info || '',
@@ -152,6 +154,21 @@ export default function CarForm({ car, onSubmit, onCancel, loading = false }: Ca
                 placeholder="0"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              VIN
+            </label>
+            <input
+              type="text"
+              name="vin"
+              value={formData.vin}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 1HGBH41JXMN109186"
+              maxLength={17}
+            />
           </div>
 
           <div>

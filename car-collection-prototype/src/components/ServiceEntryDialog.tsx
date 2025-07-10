@@ -74,6 +74,38 @@ export default function ServiceEntryDialog({
     try {
       const intervals = await apiService.getServiceIntervals(carId);
       setServiceIntervals(intervals);
+      
+      // If we're editing an existing service, check which intervals match services done on the same date
+      if (existingService) {
+        const serviceHistory = await apiService.getServiceHistory(carId);
+        
+        // Find all services done on the same date with the same invoice
+        const relatedServices = serviceHistory.filter(sh => 
+          sh.performed_date === existingService.performed_date &&
+          sh.invoice_number === existingService.invoice_number
+        );
+        
+        // Find intervals that match these services
+        const matchingIntervalIds = intervals
+          .filter(interval => 
+            relatedServices.some(service => service.service_item === interval.service_item)
+          )
+          .map(interval => interval.id);
+        
+        console.log('Pre-selecting intervals for services done together:', matchingIntervalIds);
+        setSelectedIntervals(matchingIntervalIds);
+        
+        // Pre-populate costs for these intervals
+        const costs: Record<number, string> = {};
+        matchingIntervalIds.forEach(intervalId => {
+          const interval = intervals.find(i => i.id === intervalId);
+          const service = relatedServices.find(s => s.service_item === interval?.service_item);
+          if (service && service.cost) {
+            costs[intervalId] = service.cost.toString();
+          }
+        });
+        setIntervalCosts(costs);
+      }
     } catch (error) {
       console.error('Failed to load service intervals:', error);
     } finally {
