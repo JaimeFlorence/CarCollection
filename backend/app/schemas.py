@@ -156,6 +156,9 @@ class ServiceHistoryBase(BaseModel):
     performed_date: datetime
     mileage: Optional[int] = None
     cost: Optional[Decimal] = None
+    parts_cost: Optional[Decimal] = None  # New field for parts breakdown
+    labor_cost: Optional[Decimal] = None  # New field for labor breakdown
+    tax: Optional[Decimal] = None  # New field for tax
     shop: Optional[str] = None  # New field
     invoice_number: Optional[str] = None  # New field
     notes: Optional[str] = None
@@ -170,6 +173,9 @@ class ServiceHistoryUpdate(BaseModel):
     performed_date: Optional[datetime] = None
     mileage: Optional[int] = None
     cost: Optional[Decimal] = None
+    parts_cost: Optional[Decimal] = None
+    labor_cost: Optional[Decimal] = None
+    tax: Optional[Decimal] = None
     shop: Optional[str] = None
     invoice_number: Optional[str] = None
     notes: Optional[str] = None

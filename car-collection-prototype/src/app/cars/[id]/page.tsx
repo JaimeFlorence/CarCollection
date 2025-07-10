@@ -354,6 +354,22 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
           
           console.log(`Updating service with ${selectedIntervals.length} selected intervals`);
           
+          // Calculate total of individual costs
+          const totalIndividualCosts = intervalCosts?.reduce((sum, ic) => sum + (ic.cost || 0), 0) || 0;
+          const hasTotalCost = serviceData.cost && serviceData.cost > 0;
+          const hasUnassignedCost = hasTotalCost && totalIndividualCosts === 0;
+          
+          // Check if we need to create a summary line item
+          const needsSummaryItem = hasUnassignedCost && 
+            serviceData.service_item && 
+            !selectedIntervals.some(interval => interval.service_item === editingService.service_item);
+          
+          if (needsSummaryItem) {
+            // The service being edited doesn't match any interval, so it's a summary item
+            // It's already been updated above, no need to create another one
+            console.log(`Service being edited is the summary item, already updated`);
+          }
+          
           for (let i = 0; i < selectedIntervals.length; i++) {
             const interval = selectedIntervals[i];
             
@@ -393,6 +409,27 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
           // Create a service history entry for each selected interval
           console.log(`Creating service history for ${selectedIntervals.length} intervals`);
           
+          // Calculate total of individual costs
+          const totalIndividualCosts = intervalCosts?.reduce((sum, ic) => sum + (ic.cost || 0), 0) || 0;
+          const hasTotalCost = serviceData.cost && serviceData.cost > 0;
+          const hasUnassignedCost = hasTotalCost && totalIndividualCosts === 0;
+          
+          // If there's a total cost but no individual costs, create a summary line item first
+          if (hasUnassignedCost && serviceData.service_item) {
+            console.log(`Creating summary line item for total cost: $${serviceData.cost}`);
+            try {
+              await apiService.createServiceHistory(Number(id), {
+                car_id: Number(id),
+                ...serviceData,
+                // Keep the original service_item and cost as entered
+              } as any);
+              console.log(`Successfully created summary service history entry`);
+            } catch (error) {
+              console.error(`Failed to create summary service history:`, error);
+              throw new Error(`Failed to save service summary. ${error.message || error}`);
+            }
+          }
+          
           for (let i = 0; i < selectedIntervals.length; i++) {
             const interval = selectedIntervals[i];
             // Find the cost for this specific interval
@@ -404,7 +441,7 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
               await apiService.createServiceHistory(Number(id), {
                 car_id: Number(id),
                 ...serviceData,
-                cost: intervalCost, // Use the specific cost for this interval
+                cost: intervalCost, // Use the specific cost for this interval (or 0 if not specified)
                 service_item: interval.service_item // Use the interval's exact name
               } as any);
               

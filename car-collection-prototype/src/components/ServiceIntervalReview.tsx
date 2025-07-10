@@ -54,7 +54,9 @@ export default function ServiceIntervalReview({
 
   const formatCost = (interval: ServiceResearchResult) => {
     if (interval.cost_estimate_low && interval.cost_estimate_high) {
-      return `$${interval.cost_estimate_low.toFixed(0)} - $${interval.cost_estimate_high.toFixed(0)}`;
+      const low = Number(interval.cost_estimate_low);
+      const high = Number(interval.cost_estimate_high);
+      return `$${low.toFixed(0)} - $${high.toFixed(0)}`;
     }
     return 'Cost varies';
   };

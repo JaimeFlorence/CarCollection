@@ -132,7 +132,7 @@ describe('ServiceEntryDialog', () => {
         shop: 'Joe\'s Garage',
         invoice_number: 'INV-456',
         notes: 'Replaced front pads'
-      });
+      }, [], []);
     });
     
     expect(mockOnClose).toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('ServiceEntryDialog', () => {
     fireEvent.click(submitButton);
     
     await waitFor(() => {
-      expect(alertSpy).toHaveBeenCalledWith('Failed to save service record. Please try again.');
+      expect(alertSpy).toHaveBeenCalledWith('Save failed');
     });
     
     expect(mockOnClose).not.toHaveBeenCalled();
@@ -222,7 +222,9 @@ describe('ServiceEntryDialog', () => {
           shop: 'Quick Lube',
           invoice_number: 'INV-123',
           notes: 'Test notes'
-        })
+        }),
+        [],
+        []
       );
     });
   });

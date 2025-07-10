@@ -91,6 +91,9 @@ class ServiceHistory(Base):
     performed_date = Column(DateTime, nullable=False)
     mileage = Column(Integer, nullable=True)
     cost = Column(Numeric(10, 2), nullable=True)
+    parts_cost = Column(Numeric(10, 2), nullable=True)  # New field for parts breakdown
+    labor_cost = Column(Numeric(10, 2), nullable=True)  # New field for labor breakdown
+    tax = Column(Numeric(10, 2), nullable=True)  # New field for tax
     shop = Column(String, nullable=True)  # New field for service provider
     invoice_number = Column(String, nullable=True)  # New field for invoice tracking
     notes = Column(Text, nullable=True)

@@ -207,4 +207,61 @@ describe('ServiceHistoryTable', () => {
     const editButtons = screen.queryAllByTitle('Edit service record');
     expect(editButtons).toHaveLength(0);
   });
+
+  it('calls onDelete when delete button is clicked', () => {
+    const mockOnDelete = jest.fn();
+    
+    render(
+      <ServiceHistoryTable 
+        carId={1} 
+        serviceHistory={mockServiceHistory}
+        onDelete={mockOnDelete}
+      />
+    );
+    
+    // Find the first delete button
+    const deleteButtons = screen.getAllByTitle('Delete service record');
+    expect(deleteButtons.length).toBeGreaterThan(0);
+    
+    // Click the first delete button
+    fireEvent.click(deleteButtons[0]);
+    
+    // Should call onDelete with the service record (services are sorted by date desc)
+    expect(mockOnDelete).toHaveBeenCalledWith(mockServiceHistory[2]); // Brake Inspection
+  });
+
+  it('does not show delete buttons when onDelete is not provided', () => {
+    render(
+      <ServiceHistoryTable 
+        carId={1} 
+        serviceHistory={mockServiceHistory}
+      />
+    );
+    
+    // Should not find any delete buttons
+    const deleteButtons = screen.queryAllByTitle('Delete service record');
+    expect(deleteButtons).toHaveLength(0);
+  });
+
+  it('shows both edit and delete buttons when both callbacks are provided', () => {
+    const mockOnEdit = jest.fn();
+    const mockOnDelete = jest.fn();
+    
+    render(
+      <ServiceHistoryTable 
+        carId={1} 
+        serviceHistory={mockServiceHistory}
+        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
+      />
+    );
+    
+    // Should find both edit and delete buttons
+    const editButtons = screen.getAllByTitle('Edit service record');
+    const deleteButtons = screen.getAllByTitle('Delete service record');
+    
+    expect(editButtons.length).toBeGreaterThan(0);
+    expect(deleteButtons.length).toBeGreaterThan(0);
+    expect(editButtons.length).toBe(deleteButtons.length);
+  });
 });

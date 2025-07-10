@@ -143,6 +143,66 @@
    - [x] Update ServiceHistoryTable to show breakdown
    - [ ] Write unit tests for the feature
 
+### 🔴 HIGH PRIORITY - Testing Suite Expansion (January 10, 2025)
+
+#### Phase 1: Critical Business Logic Tests
+1. **Summary Line Item Feature Tests**
+   - [ ] Test creates summary item when total cost entered but no individual costs
+   - [ ] Test doesn't create summary when individual costs are assigned
+   - [ ] Test handles edit mode correctly
+   - [ ] Test cost validation and calculations
+
+2. **Service Progress Calculation Tests**
+   - [ ] Test progress calculation by mileage
+   - [ ] Test progress calculation by time
+   - [ ] Test overdue status detection
+   - [ ] Test edge cases (negative progress, missing data)
+
+3. **Cost Breakdown Tests**
+   - [ ] Test parts + labor + tax = total validation
+   - [ ] Test handling of partial breakdowns
+   - [ ] Test CalculatorInput integration
+   - [ ] Test database persistence of breakdown fields
+
+#### Phase 2: Component Test Coverage
+1. **Missing Frontend Component Tests**
+   - [ ] CarForm.tsx - Create/edit validation, VIN field
+   - [ ] ServiceIntervalEditModal.tsx - Modal behavior, form submission
+   - [ ] ServiceIntervalAddModal.tsx - Validation, research integration
+   - [ ] EngineTypeDialog.tsx - Engine selection flow
+   - [ ] AuthContext.tsx - Login/logout flows, token management
+   - [ ] ProtectedRoute.tsx - Redirect behavior, auth checks
+
+2. **Integration Tests**
+   - [ ] Complete user flow: Create car → Add intervals → Record service
+   - [ ] API error handling (network failures, 500 errors)
+   - [ ] Concurrent user updates
+   - [ ] Data consistency across tabs
+
+#### Phase 3: Backend Test Expansion
+1. **API Endpoint Tests**
+   - [ ] Pagination for large datasets
+   - [ ] Search and filtering functionality
+   - [ ] Bulk operations (multiple service entries)
+   - [ ] Invalid data handling
+
+2. **Business Logic Tests**
+   - [ ] Service interval research engine
+   - [ ] Export/import data functionality
+   - [ ] Multi-tenancy data isolation
+   - [ ] Transaction rollback scenarios
+
+#### Phase 4: Advanced Testing
+1. **Performance Tests**
+   - [ ] Large dataset handling (1000+ service records)
+   - [ ] API response time benchmarks
+   - [ ] Frontend rendering performance
+
+2. **E2E Tests (Playwright/Cypress)**
+   - [ ] Complete user journeys
+   - [ ] Cross-browser compatibility
+   - [ ] Mobile responsive behavior
+
 #### High Priority - Next Features
 1. **Service History Enhancements**
    - [ ] Export service history to CSV/PDF
@@ -392,5 +452,40 @@ Tested OCR technology for extracting service information from Ferrari repair rec
 
 ---
 
+---
+
+## 🎯 Session Summary - January 10, 2025 (PM Session)
+
+### Issues Fixed
+1. **ServiceHistoryTable Runtime Error** ✅
+   - Fixed "toFixed is not a function" error
+   - Ensured proper number conversion for cost fields
+   
+2. **Service Cost Tracking Bug** ✅
+   - Added summary line item for total cost when no individual costs assigned
+   - Prevents $0.00 entries when service schedule items are checked
+   
+3. **Database Corruption** ✅
+   - Fixed Ferrari 355 service history data
+   - Removed duplicate entries
+   - Corrected cost breakdown calculations
+
+4. **Test Suite Repairs** ✅
+   - Fixed all failing backend tests (authentication, todos)
+   - Updated test expectations to match API behavior
+   - All 74 frontend tests passing
+   - All 20 backend tests passing
+
+### Next Priority: Test Coverage Expansion
+Current test coverage is rated 6/10. Critical gaps identified:
+- Business logic for new features (summary line items, cost calculations)
+- Missing component tests (CarForm, modals, auth components)
+- No integration or E2E tests
+- Limited API endpoint coverage
+
+See "HIGH PRIORITY - Testing Suite Expansion" section above for detailed roadmap.
+
+---
+
 **Last Updated**: January 10, 2025
-**Next Sprint Planning**: Service History Export & Analytics Dashboard
+**Next Sprint Planning**: Test Coverage Expansion (Phase 1 - Critical Business Logic)
