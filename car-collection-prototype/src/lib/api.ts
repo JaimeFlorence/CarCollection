@@ -150,6 +150,9 @@ export interface ServiceHistory {
   performed_date: string;
   mileage?: number;
   cost?: number;
+  parts_cost?: number;  // New field for parts breakdown
+  labor_cost?: number;  // New field for labor breakdown
+  tax?: number;  // New field for tax
   shop?: string;  // New field
   invoice_number?: string;  // New field
   notes?: string;
@@ -300,6 +303,7 @@ class ApiService {
     return this.request<ToDo>(`/cars/${todo.car_id}/todos/`, {
       method: 'POST',
       body: JSON.stringify({
+        car_id: todo.car_id,
         title: todo.title,
         description: todo.description,
         due_date: todo.due_date || null,

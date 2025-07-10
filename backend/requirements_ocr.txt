@@ -1,0 +1,5 @@
+# OCR Requirements for receipt processing
+pytesseract==0.3.10
+pillow==10.2.0
+opencv-python==4.9.0.80
+numpy==1.26.3

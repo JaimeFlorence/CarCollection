@@ -117,6 +117,21 @@
 - Service update checkbox bug: FIXED - Now properly saves new services when updating
 - Service interval pre-selection: FIXED - Checkboxes now pre-populate when editing
 
+### New Features (January 10, 2025)
+- **CalculatorInput Component**: IMPLEMENTED - Allows math expressions in cost fields
+  - Enter formulas like "=27.15+13.95" in any cost field
+  - Automatically calculates on blur/tab
+  - Shows calculator icon when formula is stored
+  - Safe evaluation (no eval()) using Shunting Yard algorithm
+  - Known issue: Formula recall on focus not working in ServiceEntryDialog context
+  
+- **Enhanced Cost Tracking**: IMPLEMENTED - Parts/Labor/Tax breakdown
+  - Added parts_cost, labor_cost, tax fields to database
+  - Cost breakdown section in ServiceEntryDialog
+  - Validation ensures breakdown matches total (if provided)
+  - Service History table shows breakdown under total cost
+  - All fields support CalculatorInput for easy math
+
 ## 📦 Technology Stack
 
 ### Frontend
@@ -249,21 +264,27 @@ npm run dev
 8. Fixed all critical bugs in service history system
 
 ### Next Steps
-1. Add current mileage input when marking service done
-2. Implement service history view/export (CSV/PDF)
-3. Add parts/labor/tax breakdown for service costs
+1. Fix CalculatorInput formula recall issue (deferred - low priority)
+2. Add current mileage input when marking service done
+3. Implement service history export (CSV/PDF)
 4. Create dashboard with upcoming services widget
 5. Add email notifications for due services
 6. Implement VIN decoder integration
 7. Add receipt/photo attachments to service records
+8. Write tests for Enhanced Cost Tracking feature
 
 ### Key Files Modified (January 10)
-- `ServiceEntryDialog.tsx` - Fixed syntax, added checkbox pre-selection
+- `ServiceEntryDialog.tsx` - Fixed syntax, added checkbox pre-selection, added cost breakdown fields
 - `cars/[id]/page.tsx` - Enhanced update logic for multiple services
 - `ServiceIntervalList.tsx` - Removed debug logging
 - `CarForm.tsx` - Added VIN input field
-- `api.ts` - Added VIN to Car and CarCreate interfaces
+- `api.ts` - Added VIN to Car and CarCreate interfaces, added cost breakdown fields
 - `export_all_data.py` - Created comprehensive data export script
+- `CalculatorInput.tsx` - NEW - Calculator-enabled input component
+- `models.py` - Added parts_cost, labor_cost, tax fields to ServiceHistory
+- `schemas.py` - Updated ServiceHistory schemas with new fields
+- `ServiceHistoryTable.tsx` - Shows cost breakdown when available
+- `add_cost_breakdown_columns.py` - NEW - Migration script for database
 
 ## 📋 Service History System ✅ IMPLEMENTED (January 9, 2025)
 
@@ -300,16 +321,20 @@ Comprehensive service record tracking system that integrates with Service Schedu
 
 ### Next Features to Implement
 
-#### Enhanced Cost Tracking (Discussed)
+#### ✅ Enhanced Cost Tracking (IMPLEMENTED - January 10, 2025)
 **Parts/Labor/Tax Breakdown:**
-- Add optional fields for parts cost, labor cost, and taxes
-- These should sum to the total cost
+- Added optional fields for parts cost, labor cost, and taxes
+- No validation required - fields are independent
 - Allows detailed cost analysis
 - Track labor vs parts ratio over time
 
 #### Service History Enhancements
 - Export service history to CSV/PDF
 - Attach photos/receipts to service records
+  - OCR POC completed (January 10, 2025)
+  - Tesseract tested - poor results for receipts
+  - Google Vision API integration ready - much better accuracy
+  - See `/backend/ocr_*_poc.py` for implementations
 - Service provider/shop management
 - Recurring service reminders
 - Cost prediction based on history
@@ -352,4 +377,4 @@ Anonymous service data for industry trends:
 ---
 
 **Last Updated**: January 10, 2025
-**Version**: 2.2 (Service History Bugs Fixed, VIN Support Added)
+**Version**: 2.3 (Enhanced Cost Tracking & CalculatorInput Added)

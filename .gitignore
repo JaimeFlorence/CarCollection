@@ -120,3 +120,13 @@ tmp/
 temp/ 
 # Cursor IDE
 .cursor/
+
+# Google Cloud credentials
+*credentials*.json
+google-*.json
+
+# OCR test results
+backend/Ferrari_receipt*.pdf
+
+# Test scripts output
+test_*.py

@@ -72,11 +72,14 @@ export default function ToDosTab({ carId }: ToDosTabProps) {
     setActionLoading(true);
     setActionError(null);
     try {
+      // Convert date string to datetime if provided
+      const dueDateTime = form.due_date ? new Date(form.due_date).toISOString() : undefined;
+      
       if (editingId) {
         await apiService.updateTodo(editingId, {
           title: form.title,
           description: form.description,
-          due_date: form.due_date,
+          due_date: dueDateTime,
           priority: form.priority as 'low' | 'medium' | 'high',
         });
       } else {
@@ -84,7 +87,7 @@ export default function ToDosTab({ carId }: ToDosTabProps) {
           car_id: carId,
           title: form.title,
           description: form.description,
-          due_date: form.due_date,
+          due_date: dueDateTime,
           priority: form.priority as 'low' | 'medium' | 'high',
         });
       }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ServiceHistory, ServiceInterval, apiService } from '@/lib/api';
 import { format } from 'date-fns';
+import CalculatorInput from './CalculatorInput';
 
 interface ServiceEntryDialogProps {
   carId: number;
@@ -30,6 +31,9 @@ export default function ServiceEntryDialog({
     invoice_number: existingService?.invoice_number || '',
     service_item: existingService?.service_item || '',
     cost: existingService?.cost?.toString() || '',
+    parts_cost: existingService?.parts_cost?.toString() || '',
+    labor_cost: existingService?.labor_cost?.toString() || '',
+    tax: existingService?.tax?.toString() || '',
     notes: existingService?.notes || ''
   });
   const [loading, setLoading] = useState(false);
@@ -56,6 +60,9 @@ export default function ServiceEntryDialog({
         cost: existingService?.cost?.toString() || (shouldUseInterval 
           ? (((preselectedInterval.cost_estimate_low || 0) + (preselectedInterval.cost_estimate_high || 0)) / 2).toString()
           : ''),
+        parts_cost: existingService?.parts_cost?.toString() || '',
+        labor_cost: existingService?.labor_cost?.toString() || '',
+        tax: existingService?.tax?.toString() || '',
         notes: existingService?.notes || ''
       });
       setErrors({});
@@ -132,6 +139,20 @@ export default function ServiceEntryDialog({
       newErrors.cost = 'Cost must be a number';
     }
     
+    if (formData.parts_cost && isNaN(Number(formData.parts_cost))) {
+      newErrors.parts_cost = 'Parts cost must be a number';
+    }
+    
+    if (formData.labor_cost && isNaN(Number(formData.labor_cost))) {
+      newErrors.labor_cost = 'Labor cost must be a number';
+    }
+    
+    if (formData.tax && isNaN(Number(formData.tax))) {
+      newErrors.tax = 'Tax must be a number';
+    }
+    
+    // Validation removed per user request - breakdown doesn't need to match total
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -150,6 +171,9 @@ export default function ServiceEntryDialog({
         service_item: formData.service_item.trim(),
         mileage: formData.mileage ? Number(formData.mileage) : undefined,
         cost: formData.cost ? Number(formData.cost) : undefined,
+        parts_cost: formData.parts_cost ? Number(formData.parts_cost) : undefined,
+        labor_cost: formData.labor_cost ? Number(formData.labor_cost) : undefined,
+        tax: formData.tax ? Number(formData.tax) : undefined,
         shop: formData.shop.trim() || undefined,
         invoice_number: formData.invoice_number.trim() || undefined,
         notes: formData.notes.trim() || undefined
@@ -336,22 +360,88 @@ export default function ServiceEntryDialog({
               <label htmlFor="cost" className="block text-sm font-medium text-slate-700 mb-1">
                 Total Cost
               </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                <input
-                  id="cost"
-                  type="number"
-                  step="0.01"
-                  value={formData.cost}
-                  onChange={(e) => handleChange('cost', e.target.value)}
-                  placeholder="0.00"
-                  className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.cost ? 'border-red-300' : 'border-slate-300'
-                  }`}
-                />
-              </div>
+              <CalculatorInput
+                id="cost"
+                value={formData.cost}
+                onChange={(value) => handleChange('cost', value)}
+                placeholder="0.00"
+                className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.cost ? 'border-red-300' : 'border-slate-300'
+                }`}
+              />
               {errors.cost && (
                 <p className="mt-1 text-sm text-red-600">{errors.cost}</p>
+              )}
+            </div>
+            
+            {/* Cost Breakdown Fields */}
+            <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
+              <h4 className="text-sm font-medium text-slate-700">Cost Breakdown (Optional)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="parts_cost" className="block text-sm font-medium text-slate-700 mb-1">
+                    Parts
+                  </label>
+                  <CalculatorInput
+                    id="parts_cost"
+                    value={formData.parts_cost}
+                    onChange={(value) => handleChange('parts_cost', value)}
+                    placeholder="0.00"
+                    className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.parts_cost ? 'border-red-300' : 'border-slate-300'
+                    }`}
+                  />
+                  {errors.parts_cost && (
+                    <p className="mt-1 text-sm text-red-600">{errors.parts_cost}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="labor_cost" className="block text-sm font-medium text-slate-700 mb-1">
+                    Labor
+                  </label>
+                  <CalculatorInput
+                    id="labor_cost"
+                    value={formData.labor_cost}
+                    onChange={(value) => handleChange('labor_cost', value)}
+                    placeholder="0.00"
+                    className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.labor_cost ? 'border-red-300' : 'border-slate-300'
+                    }`}
+                  />
+                  {errors.labor_cost && (
+                    <p className="mt-1 text-sm text-red-600">{errors.labor_cost}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="tax" className="block text-sm font-medium text-slate-700 mb-1">
+                    Tax
+                  </label>
+                  <CalculatorInput
+                    id="tax"
+                    value={formData.tax}
+                    onChange={(value) => handleChange('tax', value)}
+                    placeholder="0.00"
+                    className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.tax ? 'border-red-300' : 'border-slate-300'
+                    }`}
+                  />
+                  {errors.tax && (
+                    <p className="mt-1 text-sm text-red-600">{errors.tax}</p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Show breakdown total if any values are entered */}
+              {(formData.parts_cost || formData.labor_cost || formData.tax) && (
+                <div className="mt-2 text-sm text-slate-600">
+                  Breakdown Total: ${(
+                    (parseFloat(formData.parts_cost) || 0) + 
+                    (parseFloat(formData.labor_cost) || 0) + 
+                    (parseFloat(formData.tax) || 0)
+                  ).toFixed(2)}
+                </div>
               )}
             </div>
             
@@ -415,17 +505,12 @@ export default function ServiceEntryDialog({
                           <label className="block text-sm font-medium text-slate-700 mb-1">
                             Cost for this service
                           </label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={intervalCosts[interval.id] || ''}
-                              onChange={(e) => handleIntervalCostChange(interval.id, e.target.value)}
-                              placeholder="0.00"
-                              className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                          </div>
+                          <CalculatorInput
+                            value={intervalCosts[interval.id] || ''}
+                            onChange={(value) => handleIntervalCostChange(interval.id, value)}
+                            placeholder="0.00"
+                            className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
                         </div>
                       )}
                     </div>

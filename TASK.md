@@ -50,6 +50,24 @@
   - [x] Added VIN field to car edit form
   - [x] VIN displays in Vehicle Overview panel
 
+### ✅ New Features Implemented (January 10, 2025)
+- [x] **CalculatorInput Component** ✅ IMPLEMENTED
+  - [x] Safe math expression evaluation (no eval())
+  - [x] Supports +, -, *, / and parentheses
+  - [x] Shows calculator icon when expression is stored
+  - [x] Comprehensive unit tests (22 tests passing)
+  - [ ] Formula recall on focus (known issue - deferred)
+  
+- [x] **Enhanced Cost Tracking** ✅ IMPLEMENTED
+  - [x] Added parts_cost, labor_cost, tax fields to ServiceHistory model
+  - [x] Updated ServiceHistoryCreate/Update schemas
+  - [x] Database migration completed successfully
+  - [x] ServiceEntryDialog shows optional cost breakdown section
+  - [x] Validation warns if breakdown doesn't match total
+  - [x] ServiceHistoryTable displays breakdown under total cost
+  - [x] All cost fields use CalculatorInput component
+  - [ ] Write unit tests for cost breakdown feature
+
 ### 🟢 High Priority (User Priority #1) - COMPLETED
 - [x] **Multi-Tenancy Implementation** ✅ (Completed: July 7, 2024)
   - [x] Database schema updates for user isolation
@@ -117,12 +135,13 @@
    - [x] Exports cars, todos, service intervals, and history to CSV
    - [x] Preserves test data for future use
    
-2. **Enhanced Cost Tracking** 🚀 NEXT
-   - [ ] Add parts_cost, labor_cost, tax fields to ServiceHistory model
-   - [ ] Update ServiceHistoryCreate/Update schemas
-   - [ ] Modify ServiceEntryDialog to show breakdown fields
-   - [ ] Add validation that parts + labor + tax = total
-   - [ ] Update ServiceHistoryTable to show breakdown
+2. **Enhanced Cost Tracking** ✅ COMPLETED (January 10)
+   - [x] Add parts_cost, labor_cost, tax fields to ServiceHistory model
+   - [x] Update ServiceHistoryCreate/Update schemas
+   - [x] Modify ServiceEntryDialog to show breakdown fields
+   - [x] Add validation that parts + labor + tax = total
+   - [x] Update ServiceHistoryTable to show breakdown
+   - [ ] Write unit tests for the feature
 
 #### High Priority - Next Features
 1. **Service History Enhancements**
@@ -153,7 +172,7 @@
    - [ ] Service provider/shop management
    - [ ] Photo attachments for service records
    - [ ] Cost tracking and budgeting tools
-   - [ ] Service receipt OCR scanning
+   - [ ] Service receipt OCR scanning (POC completed - see OCR section below)
 
 4. **Enhanced Features**
    - [x] Maintenance tracking system (Service Intervals - DONE)
@@ -305,12 +324,18 @@
 - `/backend/app/schemas.py` - ServiceHistory schemas
 
 ### January 10, 2025
-- `/src/components/ServiceEntryDialog.tsx` - Fixed JSX syntax, added checkbox pre-selection
+- `/src/components/ServiceEntryDialog.tsx` - Fixed JSX syntax, added checkbox pre-selection, added cost breakdown fields
 - `/src/app/cars/[id]/page.tsx` - Enhanced update logic for multiple services
 - `/src/components/ServiceIntervalList.tsx` - Removed debug logging
 - `/src/components/CarForm.tsx` - Added VIN input field
-- `/src/lib/api.ts` - Added VIN to Car and CarCreate interfaces
+- `/src/lib/api.ts` - Added VIN to Car and CarCreate interfaces, added cost breakdown fields to ServiceHistory
 - `/backend/export_all_data.py` - Created comprehensive data export script
+- `/src/components/CalculatorInput.tsx` - NEW - Calculator-enabled input component for math expressions
+- `/backend/app/models.py` - Added parts_cost, labor_cost, tax fields to ServiceHistory model
+- `/backend/app/schemas.py` - Updated ServiceHistory schemas with new cost breakdown fields
+- `/src/components/ServiceHistoryTable.tsx` - Updated to display cost breakdown when available
+- `/backend/add_cost_breakdown_columns.py` - NEW - Migration script for adding cost breakdown columns
+- `/__tests__/components/CalculatorInput.test.tsx` - NEW - Unit tests for CalculatorInput component
 
 ### Scripts & Configuration
 - `/car-collection-prototype/reset_and_setup.py` - Enhanced with prerequisites check, backup
@@ -320,5 +345,52 @@
 
 ---
 
+## 📸 OCR Receipt Scanning POC Results (January 10, 2025)
+
+### Proof of Concept Completed
+Tested OCR technology for extracting service information from Ferrari repair receipts.
+
+#### 1. **Tesseract OCR Results**
+- ✅ Successfully extracted: dates, phone numbers, VIN, basic info
+- ❌ Poor performance on: line items, costs breakdown, shop name
+- ❌ Issues: text garbling, special characters, duplicate extractions
+- **Verdict**: Not suitable for production use with receipts
+
+#### 2. **Google Vision API Setup**
+- Created integration script: `/backend/ocr_google_vision_poc.py`
+- Much better accuracy expected for:
+  - Table/line item extraction
+  - Cost categorization (parts vs labor)
+  - Shop information extraction
+- **Requirements**: Google Cloud account, Vision API enabled, service account credentials
+- **Cost**: Free for first 1,000 pages/month, then $1.50/1,000
+
+#### 3. **Implementation Files Created**
+- `/backend/ocr_receipt_poc.py` - Tesseract implementation
+- `/backend/ocr_google_vision_poc.py` - Google Vision implementation
+- `/backend/GOOGLE_VISION_SETUP.md` - Setup instructions
+- `/backend/ocr_results.json` - Tesseract test results
+
+#### 4. **Recommended Approach**
+1. Use Google Vision API for better accuracy
+2. Create review/correction UI before saving to database
+3. Map extracted fields to ServiceHistory model:
+   - Shop name → shop
+   - Invoice # → invoice_number
+   - Service date → performed_date
+   - Parts total → parts_cost
+   - Labor total → labor_cost
+   - Tax → tax
+   - Grand total → cost
+
+#### 5. **Future Enhancement Ideas**
+- Support multiple receipt pages
+- Auto-categorize common service items
+- Learn shop-specific formats over time
+- Batch upload multiple receipts
+- Mobile app integration for photo capture
+
+---
+
 **Last Updated**: January 10, 2025
-**Next Sprint Planning**: Enhanced Cost Tracking & Analytics Dashboard
+**Next Sprint Planning**: Service History Export & Analytics Dashboard
