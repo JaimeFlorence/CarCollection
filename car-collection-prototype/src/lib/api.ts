@@ -270,6 +270,16 @@ class ApiService {
     });
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<User> {
+    return this.request<User>('/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    });
+  }
+
   // Car endpoints (now require authentication)
   async getCars(): Promise<Car[]> {
     return this.request<Car[]>('/cars/');

@@ -45,6 +45,19 @@ class ApiServiceAxios {
     return response.data;
   }
 
+  async updateUser(userId: number, userUpdate: Partial<User>): Promise<User> {
+    const response = await axiosClient.put<User>(`/admin/users/${userId}`, userUpdate);
+    return response.data;
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<User> {
+    const response = await axiosClient.put<User>('/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+    return response.data;
+  }
+
   // Car endpoints
   async getCars(): Promise<Car[]> {
     const response = await axiosClient.get<Car[]>('/cars/');

@@ -5,14 +5,14 @@ from . import models, schemas, crud, database
 from .database import SessionLocal, engine, get_db
 from .auth import (
     authenticate_user, create_access_token, get_current_active_user,
-    get_current_admin_user, update_last_login
+    get_current_admin_user, update_last_login, verify_password
 )
 from .service_api import router as service_router
 from .data_management import router as data_router
 from .invitation_api import router as invitation_router
 from .config import settings
 from typing import List
-from datetime import timedelta
+from datetime import timedelta, datetime, UTC
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -156,6 +156,29 @@ def update_user(
         raise HTTPException(status_code=404, detail="User not found")
     
     return updated_user
+
+# User Self-Service Endpoints
+@app.put("/auth/change-password", response_model=schemas.UserOut)
+def change_password(
+    password_change: schemas.PasswordChange,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user)
+):
+    # Verify current password
+    if not verify_password(password_change.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+    
+    # Update password
+    from .auth import get_password_hash
+    current_user.hashed_password = get_password_hash(password_change.new_password)
+    current_user.updated_at = datetime.now(UTC)
+    db.commit()
+    db.refresh(current_user)
+    
+    return current_user
 
 # Car Endpoints (Updated for multi-tenancy)
 @app.post("/cars/", response_model=schemas.CarOut, status_code=status.HTTP_201_CREATED)
