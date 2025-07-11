@@ -130,3 +130,22 @@ backend/Ferrari_receipt*.pdf
 
 # Test scripts output
 test_*.py
+
+# Temporary deployment fix scripts
+*-fix.sh
+fix-*.sh
+nuclear-*.sh
+emergency-*.sh
+investigate-*.sh
+check-*.sh
+complete-*.sh
+definitive-*.sh
+direct-*.sh
+quick-*.sh
+repair-*.sh
+create-secure-admin.sh
+
+# But keep these important scripts
+!setup-local-dev.sh
+!fresh-server-setup.sh
+!deployment/prepare-for-deployment.sh

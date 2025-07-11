@@ -14,6 +14,7 @@ This guide provides the complete, working deployment process for the Car Collect
 6. [User Management](#user-management)
 7. [Maintenance](#maintenance)
 8. [Troubleshooting](#troubleshooting)
+9. [Critical Lessons Learned](#critical-lessons-learned)
 
 ## Prerequisites
 
@@ -86,22 +87,17 @@ openssl rand -hex 32
 # Save this key - you'll need it for the .env file
 ```
 
-### 2. Set Up PostgreSQL (Recommended for Production)
-```bash
-# Switch to postgres user
-sudo -u postgres psql
+### 2. Administrator Account
+**IMPORTANT**: The application uses a single administrator account:
+- **Username**: `Administrator`
+- **Password**: `Tarzan7Jane`
+- **Email**: `admin@example.com`
 
-# Create database and user
-CREATE DATABASE carcollection_db;
-CREATE USER carcollection WITH ENCRYPTED PASSWORD 'your-strong-password';
-GRANT ALL PRIVILEGES ON DATABASE carcollection_db TO carcollection;
-\q
-```
+This account is created during deployment and should be the ONLY account initially.
 
 ### 3. Configure Environment Variables
 
-#### For HTTP deployment (no domain yet)
-Create `/opt/carcollection/backend/.env`:
+#### Backend Configuration (`/opt/carcollection/backend/.env`)
 ```bash
 # Database Configuration
 DATABASE_URL=sqlite:///./car_collection.db
@@ -112,7 +108,7 @@ JWT_ALGORITHM=HS256
 JWT_EXPIRATION_HOURS=4
 
 # CORS Configuration - IMPORTANT: Use proper JSON array format
-CORS_ORIGINS=["http://YOUR_VPS_IP"]
+CORS_ORIGINS=["http://93.127.194.202"]
 
 # Application Settings
 ENVIRONMENT=production
@@ -123,16 +119,13 @@ INVITATION_EXPIRY_DAYS=7
 ALLOW_REGISTRATION=False
 
 # Frontend URL
-FRONTEND_URL=http://YOUR_VPS_IP
+FRONTEND_URL=http://93.127.194.202
 ```
 
-#### For HTTPS deployment (with domain)
-Update the CORS_ORIGINS and FRONTEND_URL to use https and your domain.
-
-Create `/opt/carcollection/car-collection-prototype/.env.local`:
+#### Frontend Configuration (`/opt/carcollection/car-collection-prototype/.env.production`)
 ```bash
 # API Configuration
-NEXT_PUBLIC_API_URL=https://yourdomain.com/api
+NEXT_PUBLIC_API_URL=http://93.127.194.202
 
 # Application Settings
 NEXT_PUBLIC_APP_NAME=Car Collection Manager
@@ -142,52 +135,38 @@ NEXT_PUBLIC_ENABLE_INVITATIONS=true
 
 ## Application Deployment
 
-### Quick Deployment (Recommended)
+### Clean Deployment Script (Recommended)
 
-For a working deployment, use the quick-fix script that was successfully tested:
+Use the `prepare-deployment.sh` script for a clean deployment:
 
 ```bash
-# As root user
-cd /opt
-git clone https://github.com/yourusername/CarCollection.git carcollection
-cd carcollection
-
-# Run the quick deployment
-chmod +x quick-fix.sh
-./quick-fix.sh
+# Copy and run the deployment preparation script
+cd /opt/carcollection
+chmod +x prepare-deployment.sh
+./prepare-deployment.sh
 ```
 
 This script will:
-1. Fix the CORS configuration
-2. Create your admin user interactively
-3. Restart all services
-4. Provide the access URL
+1. Stop all services
+2. Backup existing database
+3. Create a fresh database with only Administrator account
+4. Set up proper environment files
+5. Ensure no localhost references in code
+6. Rebuild frontend
+7. Update nginx configuration
+8. Restart all services
+9. Verify deployment
 
-### Standard Deployment Process
+### Manual Deployment Steps
 
 #### 1. Clone Repository
 ```bash
-# As root or with sudo
 cd /opt
-sudo mkdir -p carcollection
-sudo chown $USER:$USER carcollection
+git clone https://github.com/yourusername/CarCollection.git carcollection
 cd carcollection
-
-# Clone your repository
-git clone https://github.com/yourusername/CarCollection.git .
 ```
 
-#### 2. Run Deployment Script
-```bash
-# Make sure you're in /opt/carcollection
-cd /opt/carcollection
-chmod +x deployment/deploy.sh
-./deployment/deploy.sh
-```
-
-### 3. Manual Deployment (if script fails)
-
-#### Backend Setup
+#### 2. Backend Setup
 ```bash
 cd /opt/carcollection/backend
 
@@ -198,137 +177,223 @@ source venv/bin/activate
 # Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
-pip install gunicorn
-
-# IMPORTANT: Install pydantic-settings (often missing)
-pip install pydantic-settings==2.1.0
+pip install gunicorn pydantic-settings==2.1.0
 
 # Initialize database
 python init_db.py
 
-# Create admin user
-python create_admin.py
+# Create Administrator account
+python << 'EOF'
+import sys
+sys.path.insert(0, '.')
+from app.database import SessionLocal
+from app.models import User
+from app.auth import get_password_hash
+
+db = SessionLocal()
+admin_user = User(
+    username="Administrator",
+    email="admin@example.com",
+    hashed_password=get_password_hash("Tarzan7Jane"),
+    is_admin=True
+)
+db.add(admin_user)
+db.commit()
+db.close()
+print("Administrator account created")
+EOF
 
 deactivate
 ```
 
-#### Frontend Setup
+#### 3. Frontend Setup
 ```bash
 cd /opt/carcollection/car-collection-prototype
 
-# Install dependencies (use npm install instead of ci to avoid lock file issues)
+# Install dependencies
 npm install
 
-# Build for production (may show ESLint warnings - this is normal)
+# Create production environment file
+cat > .env.production << EOF
+NEXT_PUBLIC_API_URL=http://93.127.194.202
+EOF
+
+# Build for production
 export NEXT_TELEMETRY_DISABLED=1
 npm run build
-
-# Install PM2 (alternative to systemd for Node.js)
-npm install -g pm2
 ```
 
-### 4. Set Up Services
+#### 4. Set Up Services
 
-#### Using systemd (Recommended)
+Create systemd service files:
+
+**Backend Service** (`/etc/systemd/system/carcollection-backend.service`):
+```ini
+[Unit]
+Description=Car Collection Backend
+After=network.target
+
+[Service]
+Type=notify
+User=carcollection
+WorkingDirectory=/opt/carcollection/backend
+Environment="PATH=/opt/carcollection/backend/venv/bin"
+ExecStart=/opt/carcollection/backend/venv/bin/gunicorn app.main:app --bind 127.0.0.1:8000 --workers 2 --worker-class uvicorn.workers.UvicornWorker
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Frontend Service** (`/etc/systemd/system/carcollection-frontend.service`):
+```ini
+[Unit]
+Description=Car Collection Frontend
+After=network.target
+
+[Service]
+Type=simple
+User=carcollection
+WorkingDirectory=/opt/carcollection/car-collection-prototype
+Environment="NODE_ENV=production"
+Environment="PORT=3001"
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start services:
 ```bash
-# Copy service files
-sudo cp /opt/carcollection/deployment/carcollection-backend.service /etc/systemd/system/
-sudo cp /opt/carcollection/deployment/carcollection-frontend.service /etc/systemd/system/
-
-# Reload systemd
 sudo systemctl daemon-reload
-
-# Start and enable services
 sudo systemctl enable carcollection-backend carcollection-frontend
 sudo systemctl start carcollection-backend carcollection-frontend
-
-# Check status
-sudo systemctl status carcollection-backend
-sudo systemctl status carcollection-frontend
 ```
 
-#### Using PM2 (Alternative for Frontend)
-```bash
-cd /opt/carcollection/car-collection-prototype
-pm2 start npm --name "carcollection-frontend" -- start
-pm2 save
-pm2 startup
+#### 5. Configure Nginx
+
+Create nginx configuration (`/etc/nginx/sites-available/carcollection`):
+```nginx
+server {
+    listen 80;
+    server_name 93.127.194.202;
+
+    # Frontend
+    location / {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Auth endpoints
+    location /auth/ {
+        proxy_pass http://localhost:8000/auth/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # API endpoints
+    location /api/ {
+        proxy_pass http://localhost:8000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
 
-### 5. Configure Nginx
+Enable the site:
 ```bash
-# Update nginx config with your domain
-sudo nano /opt/carcollection/deployment/nginx.conf
-# Replace 'yourdomain.com' with your actual domain
-
-# Copy to nginx
-sudo cp /opt/carcollection/deployment/nginx.conf /etc/nginx/sites-available/carcollection
 sudo ln -sf /etc/nginx/sites-available/carcollection /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
-
-# Test configuration
 sudo nginx -t
-
-# Reload nginx
 sudo systemctl reload nginx
 ```
 
-## SSL/HTTPS Setup
+## Critical Lessons Learned
 
-### 1. Point Your Domain to the VPS
-Update your domain's DNS A records to point to 93.127.194.202
+### 1. Frontend API URL Configuration
+**Problem**: Frontend was hardcoded to use `localhost:8000` instead of the server IP.
 
-### 2. Install SSL Certificate
-```bash
-# Replace yourdomain.com with your actual domain
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+**Solution**: 
+- Always use environment variables: `process.env.NEXT_PUBLIC_API_URL`
+- Never hardcode localhost URLs in production code
+- The `api.ts` file should use:
+  ```typescript
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  ```
 
-# Follow the prompts to complete SSL setup
-# Choose to redirect HTTP to HTTPS when asked
+### 2. CORS Configuration Format
+**Problem**: CORS_ORIGINS must be a JSON array, not a string.
+
+**Correct Format**:
+```
+CORS_ORIGINS=["http://93.127.194.202"]
 ```
 
-### 3. Auto-Renewal
-```bash
-# Test renewal
-sudo certbot renew --dry-run
-
-# Certbot automatically sets up a cron job for renewal
+**Incorrect Format**:
 ```
+CORS_ORIGINS=http://93.127.194.202
+```
+
+### 3. Email Validation
+**Problem**: Pydantic email validation rejects `.local` domains.
+
+**Solution**: Use standard TLDs like `.com` for email addresses:
+```python
+email="admin@example.com"  # Good
+email="admin@carcollection.local"  # Will fail validation
+```
+
+### 4. Frontend Port Configuration
+**Problem**: Mismatch between nginx proxy (expecting 3001) and frontend service (running on 3000).
+
+**Solution**: Ensure frontend service uses PORT=3001 in systemd configuration.
+
+### 5. Browser Caching Issues
+**Problem**: Browser caches old JavaScript with localhost references.
+
+**Solution**: 
+- Always clear browser cache after deployment updates
+- Use incognito/private mode for testing
+- Consider implementing cache-busting in production
+
+### 6. Database State Management
+**Problem**: Database accumulates test data and multiple admin accounts during troubleshooting.
+
+**Solution**: Always start fresh deployments with a clean database containing only the Administrator account.
 
 ## User Management
 
-### 1. Create Admin Invitation
-```bash
-# First, get an admin token
-curl -X POST https://yourdomain.com/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'
+### Initial Login
+After deployment, login with:
+- **URL**: http://93.127.194.202
+- **Username**: Administrator
+- **Password**: Tarzan7Jane
 
-# Use the token to create an invitation
-curl -X POST https://yourdomain.com/api/invitations/create \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Content-Type: application/json" \
-  -d '{"email": "friend@email.com", "is_admin": false}'
-```
-
-### 2. Send Invitation Link
-The API will return an invitation URL like:
-```
-https://yourdomain.com/register?token=INVITATION_TOKEN
-```
-
-Send this link to your friends/family. They can use it to create their account.
-
-### 3. Managing Users via Admin Panel
-- Login as admin at https://yourdomain.com/login
-- Navigate to Admin panel
-- Create and manage invitations
-- View user list
-- Manage user permissions
+### Creating Additional Users
+1. Login as Administrator
+2. Navigate to Admin panel
+3. Create invitations for new users
+4. Send invitation links to users
 
 ## Maintenance
 
-### 1. View Logs
+### View Logs
 ```bash
 # Backend logs
 sudo journalctl -u carcollection-backend -f
@@ -337,36 +402,16 @@ sudo journalctl -u carcollection-backend -f
 sudo journalctl -u carcollection-frontend -f
 
 # Nginx logs
-sudo tail -f /var/log/nginx/access.log
 sudo tail -f /var/log/nginx/error.log
 ```
 
-### 2. Backup Database
+### Backup Database
 ```bash
-# Create backup script
-cat > /opt/carcollection/backup.sh << 'EOF'
-#!/bin/bash
-BACKUP_DIR="/opt/carcollection/backups"
-mkdir -p "$BACKUP_DIR"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# Backup PostgreSQL
-pg_dump carcollection_db > "$BACKUP_DIR/db_backup_$DATE.sql"
-
-# Or backup SQLite
-# cp /opt/carcollection/backend/car_collection.db "$BACKUP_DIR/db_backup_$DATE.db"
-
-# Keep only last 7 days of backups
-find "$BACKUP_DIR" -name "db_backup_*" -mtime +7 -delete
-EOF
-
-chmod +x /opt/carcollection/backup.sh
-
-# Add to crontab for daily backups
-(crontab -l 2>/dev/null; echo "0 2 * * * /opt/carcollection/backup.sh") | crontab -
+# For SQLite
+cp /opt/carcollection/backend/car_collection.db /opt/carcollection/backups/db_$(date +%Y%m%d).db
 ```
 
-### 3. Update Application
+### Update Application
 ```bash
 cd /opt/carcollection
 git pull origin main
@@ -379,7 +424,7 @@ deactivate
 
 # Rebuild frontend
 cd ../car-collection-prototype
-npm ci
+npm install
 npm run build
 
 # Restart services
@@ -388,141 +433,79 @@ sudo systemctl restart carcollection-backend carcollection-frontend
 
 ## Troubleshooting
 
-### Common Issues and Solutions
+### Common Issues
 
-1. **Module not found: '@/lib/defaultServiceIntervals'**
-   ```bash
-   cd /opt/carcollection
-   git add -f car-collection-prototype/src/lib/defaultServiceIntervals.ts
-   git commit -m "Add gitignored file"
-   git push
-   ```
+1. **Login Spinning/Not Working**
+   - Check browser console for localhost:8000 references
+   - Clear browser cache completely
+   - Verify frontend is using correct API URL
+   - Check nginx is properly routing /auth/ endpoints
 
-2. **ESLint errors during build**
-   - Add to `next.config.js`:
-   ```javascript
-   eslint: {
-     ignoreDuringBuilds: true,
-   },
-   typescript: {
-     ignoreBuildErrors: true,
-   }
-   ```
+2. **502 Bad Gateway**
+   - Backend service not running
+   - Check: `sudo systemctl status carcollection-backend`
+   - Check logs: `sudo journalctl -u carcollection-backend -n 50`
 
-3. **npm ci fails with package-lock.json**
-   - Use `npm install` instead of `npm ci`
+3. **Internal Server Error on Login**
+   - Check for email validation errors
+   - Verify database has correct user data
+   - Check backend logs for detailed error messages
 
-4. **PydanticImportError: BaseSettings**
-   ```bash
-   cd /opt/carcollection/backend
-   source venv/bin/activate
-   pip install pydantic-settings==2.1.0
-   deactivate
-   ```
+4. **Frontend Not Loading**
+   - Verify frontend service is running on port 3001
+   - Check: `sudo systemctl status carcollection-frontend`
+   - Verify nginx configuration
 
-5. **CORS_ORIGINS JSON parsing error**
-   - Ensure proper JSON array format in .env:
-   ```
-   CORS_ORIGINS=["http://93.127.194.202"]
-   ```
-   - NOT: `CORS_ORIGINS=http://93.127.194.202`
-
-6. **502 Bad Gateway**
-   - Check if backend is running: `sudo systemctl status carcollection-backend`
-   - Check backend logs: `sudo journalctl -u carcollection-backend -n 50`
-   - Verify pydantic-settings is installed
-
-7. **Frontend not loading**
-   - Check if frontend is running: `sudo systemctl status carcollection-frontend`
-   - Check frontend logs: `sudo journalctl -u carcollection-frontend -n 50`
-   - Ensure port 3001 is not blocked
-
-8. **Permission errors**
-   - Fix ownership: `sudo chown -R $USER:$USER /opt/carcollection`
-   - Create log directory: `sudo mkdir -p /var/log/carcollection`
-
-### Health Checks
+### Health Check Commands
 ```bash
 # Check all services
 sudo systemctl status carcollection-backend carcollection-frontend nginx
 
-# Test API endpoint
-curl http://YOUR_VPS_IP/api/docs
-
-# Check if services are listening
-sudo ss -tlnp | grep -E '3001|8000'
-
-# Check disk space
-df -h
-
-# Check memory usage
-free -m
-
-# Test frontend
-curl -I http://YOUR_VPS_IP
-
-# Check nginx error log
-sudo tail -f /var/log/nginx/error.log
-```
-
-### Quick Diagnostic Script
-```bash
-#!/bin/bash
-echo "=== Service Status ==="
-sudo systemctl is-active carcollection-backend
-sudo systemctl is-active carcollection-frontend
-sudo systemctl is-active nginx
-
-echo -e "\n=== Port Check ==="
+# Check listening ports
 sudo ss -tlnp | grep -E '3001|8000|80'
 
-echo -e "\n=== Recent Logs ==="
-sudo journalctl -u carcollection-backend -n 5 --no-pager
-sudo journalctl -u carcollection-frontend -n 5 --no-pager
+# Test backend directly
+curl -X POST http://localhost:8000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "Administrator", "password": "Tarzan7Jane"}'
 
-echo -e "\n=== API Test ==="
-curl -s http://localhost:8000/docs | head -n 5
+# Test through nginx
+curl -X POST http://93.127.194.202/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "Administrator", "password": "Tarzan7Jane"}'
 ```
 
 ## Security Best Practices
 
-1. **Regular Updates**
-   ```bash
-   # System updates
-   sudo apt update && sudo apt upgrade -y
-   
-   # Python package updates
-   cd /opt/carcollection/backend
-   source venv/bin/activate
-   pip list --outdated
-   deactivate
-   ```
+1. **Change Default Credentials**: After first login, consider changing the Administrator password
+2. **Use HTTPS**: Set up SSL certificates with Let's Encrypt when domain is available
+3. **Regular Updates**: Keep system and application dependencies updated
+4. **Backup Regularly**: Implement automated daily backups
+5. **Monitor Access**: Review logs regularly for unauthorized access attempts
 
-2. **Monitor Access**
-   - Set up fail2ban for SSH protection
-   - Monitor nginx access logs
-   - Review authentication logs regularly
+## Deployment Scripts
 
-3. **Secure Backups**
-   - Encrypt backup files
-   - Store backups off-site
-   - Test restore procedures
+For detailed information about all deployment and maintenance scripts, see [DEPLOYMENT_SCRIPTS.md](DEPLOYMENT_SCRIPTS.md).
 
-4. **Regular Security Audits**
-   - Review user accounts
-   - Check for unused open ports
-   - Monitor system resources
+Key scripts include:
+- `setup-local-dev.sh` - Set up local development environment
+- `fresh-server-setup.sh` - Create fresh database on server
+- `fix-database-permissions.sh` - Fix database permission issues
+- `diagnose-login.sh` - Comprehensive login troubleshooting
 
 ## Support
 
-For issues or questions:
-1. Check application logs first
-2. Review this deployment guide
-3. Check the project's GitHub issues
-4. Contact the system administrator
+For deployment issues:
+1. Check all logs (backend, frontend, nginx)
+2. Verify all services are running
+3. Ensure no localhost references in production code
+4. Clear browser cache and test in incognito mode
+5. Review this deployment guide thoroughly
+6. Run diagnostic scripts from DEPLOYMENT_SCRIPTS.md
 
-Remember to:
-- Keep your admin password secure
-- Regularly backup your data
-- Monitor system resources
-- Keep the application updated
+Remember:
+- Always use environment variables for configuration
+- Never hardcode localhost URLs
+- Keep the Administrator credentials secure
+- Test thoroughly after each deployment
+- Ensure database is owned by `carcollection` user, not root
