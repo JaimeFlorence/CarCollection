@@ -493,6 +493,74 @@ Key scripts include:
 - `fix-database-permissions.sh` - Fix database permission issues
 - `diagnose-login.sh` - Comprehensive login troubleshooting
 
+## Staging Deployment Best Practices
+
+### Safe Deployment Process
+
+When deploying updates to staging, follow these steps to preserve data:
+
+1. **Check for Database Changes**:
+   ```bash
+   ./check-db-changes.sh main feature/your-branch
+   ```
+
+2. **Deploy with Database Preservation**:
+   ```bash
+   ./deploy-staging-safe.sh feature/your-branch
+   ```
+
+3. **Rollback if Needed**:
+   ```bash
+   ./rollback-staging.sh car_collection.db.backup.TIMESTAMP
+   ```
+
+### Database Migration Strategy
+
+#### For Schema Changes:
+1. **Always backup first**: The deploy script does this automatically
+2. **Test migrations locally**: Use a copy of production data
+3. **Create migration scripts**: Document all schema changes
+4. **Have rollback plan ready**: Know how to undo changes
+
+#### Types of Changes:
+- **Safe Changes** (can be done live):
+  - Adding new nullable columns
+  - Adding new tables
+  - Adding indexes
+  - API-only changes (schemas.py)
+
+- **Risky Changes** (require careful planning):
+  - Removing columns/tables
+  - Changing column types
+  - Adding non-nullable columns
+  - Renaming columns/tables
+
+### Deployment Scripts
+
+- **deploy-staging-safe.sh**: Standard deployment preserving database
+- **rollback-staging.sh**: Emergency rollback with database restore
+- **check-db-changes.sh**: Detect database schema changes
+- **deploy-to-staging.sh**: Full deployment (includes database reset - use carefully!)
+
+### Important: API Routing Configuration
+
+The application has a routing mismatch that must be handled in nginx:
+- **Frontend expects**: `/api/cars/`
+- **Backend provides**: `/cars/`
+
+The staging nginx configuration (`deployment/nginx-staging.conf`) includes a fix that maps `/api/cars` to `/cars`. This configuration is automatically applied during deployment.
+
+**Never manually edit nginx on the server** - always update the configuration in git to prevent losing changes during deployment.
+
+### Testing After Deployment
+
+Always test these critical functions:
+1. User login/logout
+2. Core functionality specific to your changes
+3. Database integrity (no data loss)
+4. Performance (no degradation)
+5. Error handling
+
 ## Support
 
 For deployment issues:
