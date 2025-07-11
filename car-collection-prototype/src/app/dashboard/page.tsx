@@ -119,7 +119,7 @@ export default function Dashboard() {
 
   // Calculate collection statistics
   const totalCars = cars.length;
-  const totalMileage = cars.reduce((sum, car) => sum + car.mileage, 0);
+  const totalMileage = cars.reduce((sum, car) => sum + (car.mileage || 0), 0);
   const avgMileage = totalCars > 0 ? Math.round(totalMileage / totalCars) : 0;
   
   // Group statistics
@@ -224,7 +224,7 @@ export default function Dashboard() {
                           </div>
                           <div>
                             <p className="text-sm text-slate-600">Total Mileage</p>
-                            <p className="text-2xl font-bold text-slate-900">{totalMileage.toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-slate-900">{(totalMileage || 0).toLocaleString()}</p>
                           </div>
                         </div>
                       </div>
@@ -238,7 +238,7 @@ export default function Dashboard() {
                           </div>
                           <div>
                             <p className="text-sm text-slate-600">Avg. Mileage</p>
-                            <p className="text-2xl font-bold text-slate-900">{avgMileage.toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-slate-900">{(avgMileage || 0).toLocaleString()}</p>
                           </div>
                         </div>
                       </div>

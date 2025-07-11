@@ -55,9 +55,10 @@ export default function ServiceIntervalList({
   const calculateServiceStatuses = (history: ServiceHistory[]) => {
     const statuses: ServiceStatus[] = intervals.map(interval => {
       // Find the most recent service for this interval
-      const recentService = history
+      const filteredHistory = history
         .filter(h => h.service_item === interval.service_item)
-        .sort((a, b) => new Date(b.performed_date).getTime() - new Date(a.performed_date).getTime())[0];
+        .sort((a, b) => new Date(b.performed_date).getTime() - new Date(a.performed_date).getTime());
+      const recentService = filteredHistory.length > 0 ? filteredHistory[0] : null;
 
       let progressPercent = 0;
       let status: 'ok' | 'due_soon' | 'overdue' = 'ok';
@@ -186,8 +187,10 @@ export default function ServiceIntervalList({
 
       // Return the more restrictive (shorter) interval
       if (nextDueByMiles && nextDueByDate) {
-        const milesRemaining = parseInt(nextDueByMiles.split(' ')[0].replace(/,/g, ''));
-        const monthsRemaining = parseInt(nextDueByDate.split(' ')[0]);
+        const milesParts = nextDueByMiles.split(' ');
+        const milesRemaining = milesParts.length > 0 ? parseInt(milesParts[0].replace(/,/g, '')) : 0;
+        const dateParts = nextDueByDate.split(' ');
+        const monthsRemaining = dateParts.length > 0 ? parseInt(dateParts[0]) : 0;
         // Rough estimate: 1000 miles per month
         const milesInMonths = monthsRemaining * 1000;
         return milesRemaining < milesInMonths ? nextDueByMiles : nextDueByDate;

@@ -37,7 +37,12 @@ export function SessionManager() {
 
     try {
       // JWT structure: header.payload.signature
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.error('Invalid JWT token format');
+        return null;
+      }
+      const payload = JSON.parse(atob(parts[1]));
       // JWT exp is in seconds, convert to milliseconds
       const expirationTime = payload.exp * 1000;
       // Calculate issue time (4 hours before expiration)

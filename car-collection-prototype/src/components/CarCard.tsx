@@ -94,7 +94,7 @@ export default function CarCard({ car, onEdit, onDelete }: CarCardProps) {
             {car.year} {car.make} {car.model}
           </h2>
           <p className="text-slate-600 mt-1">
-            Mileage: {car.mileage.toLocaleString()} miles
+            Mileage: {(car.mileage || 0).toLocaleString()} miles
           </p>
           {car.license_plate && (
             <p className="text-sm text-slate-500 mt-1">

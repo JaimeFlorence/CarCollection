@@ -526,7 +526,7 @@ export default function ServiceEntryDialog({
                   {formData.cost && (
                     <div className="flex justify-between text-sm mt-1">
                       <span className="text-slate-600">Invoice total:</span>
-                      <span className="font-medium">${parseFloat(formData.cost).toFixed(2)}</span>
+                      <span className="font-medium">${parseFloat(formData.cost || '0').toFixed(2)}</span>
                     </div>
                   )}
                 </div>

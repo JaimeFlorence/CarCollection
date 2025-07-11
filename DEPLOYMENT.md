@@ -103,7 +103,7 @@ This account is created during deployment and should be the ONLY account initial
 DATABASE_URL=sqlite:///./car_collection.db
 
 # Security Configuration
-SECRET_KEY=your-generated-secret-key-here
+SECRET_KEY=1d247327682c9061e369ed897a62970e350bf63a53304e6b407feacba202d635
 JWT_ALGORITHM=HS256
 JWT_EXPIRATION_HOURS=4
 

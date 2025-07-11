@@ -767,7 +767,7 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
                       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                         <div>
                           <div className="text-sm text-slate-600 mb-1">Date</div>
-                          <div className="font-medium text-slate-900">{new Date(f.date).toLocaleDateString()}</div>
+                          <div className="font-medium text-slate-900">{f.date ? new Date(f.date).toLocaleDateString() : 'N/A'}</div>
                         </div>
                         <div>
                           <div className="text-sm text-slate-600 mb-1">Mileage</div>
@@ -846,7 +846,7 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                           <div className="text-sm text-slate-600 mb-1">Date</div>
-                          <div className="font-medium text-slate-900">{new Date(r.date).toLocaleDateString()}</div>
+                          <div className="font-medium text-slate-900">{r.date ? new Date(r.date).toLocaleDateString() : 'N/A'}</div>
                         </div>
                         <div>
                           <div className="text-sm text-slate-600 mb-1">Description</div>
