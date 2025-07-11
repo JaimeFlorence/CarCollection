@@ -1,0 +1,57 @@
+# Empty Database Fix Deployment Commands
+# Run these commands on your staging server (93.127.194.202)
+
+# 1. SSH into your server:
+ssh root@93.127.194.202
+
+# 2. Once connected, run these commands:
+
+cd /opt/carcollection
+
+# Create backup
+BACKUP_DIR="/opt/carcollection/backups/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+cp -r car-collection-prototype "$BACKUP_DIR/"
+cp backend/car_collection.db "$BACKUP_DIR/" 2>/dev/null || true
+echo "Backup created at: $BACKUP_DIR"
+
+# Stop services
+systemctl stop carcollection-frontend carcollection-backend
+
+# Apply fixes
+cd car-collection-prototype
+
+# Fix dashboard
+sed -i 's/{totalMileage\.toLocaleString()}/{(totalMileage || 0).toLocaleString()}/g' src/app/dashboard/page.tsx
+sed -i 's/{avgMileage\.toLocaleString()}/{(avgMileage || 0).toLocaleString()}/g' src/app/dashboard/page.tsx
+sed -i 's/sum + car\.mileage/sum + (car.mileage || 0)/g' src/app/dashboard/page.tsx
+
+# Fix car cards
+sed -i 's/{car\.mileage\.toLocaleString()}/{(car.mileage || 0).toLocaleString()}/g' src/components/CarCardEnhanced.tsx
+sed -i 's/{car\.mileage\.toLocaleString()}/{(car.mileage || 0).toLocaleString()}/g' src/components/CarCard.tsx
+
+# Fix service entry dialog
+sed -i 's/parseFloat(formData\.cost)\.toFixed/parseFloat(formData.cost || '\''0'\'').toFixed/g' src/components/ServiceEntryDialog.tsx
+
+# Fix car detail page dates
+sed -i 's/{new Date(f\.date)\.toLocaleDateString()}/{f.date ? new Date(f.date).toLocaleDateString() : '\''N\/A'\''}/g' src/app/cars/[id]/page.tsx
+sed -i 's/{new Date(r\.date)\.toLocaleDateString()}/{r.date ? new Date(r.date).toLocaleDateString() : '\''N\/A'\''}/g' src/app/cars/[id]/page.tsx
+
+# Rebuild frontend
+rm -rf .next
+export NODE_ENV=production
+export NEXT_TELEMETRY_DISABLED=1
+npm run build
+
+# Start services
+systemctl start carcollection-backend
+sleep 3
+systemctl start carcollection-frontend
+
+# Check status
+systemctl status carcollection-backend --no-pager | head -5
+systemctl status carcollection-frontend --no-pager | head -5
+
+# Test
+curl -s http://localhost:3001/ | grep -q "Car Collection Manager" && echo "Frontend OK" || echo "Frontend ERROR"
+curl -s http://localhost:8000/api/ > /dev/null && echo "Backend OK" || echo "Backend ERROR"
