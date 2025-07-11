@@ -47,8 +47,19 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate) -> O
     db_user = get_user(db, user_id)
     if not db_user:
         return None
-    for field, value in user_update.model_dump(exclude_unset=True).items():
+    
+    update_data = user_update.model_dump(exclude_unset=True)
+    
+    # Handle password separately - need to hash it
+    if "password" in update_data and update_data["password"]:
+        from .auth import get_password_hash
+        db_user.hashed_password = get_password_hash(update_data["password"])
+        del update_data["password"]  # Remove password from update_data
+    
+    # Update other fields
+    for field, value in update_data.items():
         setattr(db_user, field, value)
+    
     db.commit()
     db.refresh(db_user)
     return db_user

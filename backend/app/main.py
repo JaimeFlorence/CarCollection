@@ -134,6 +134,29 @@ def read_users(
 ):
     return crud.get_users(db, skip=skip, limit=limit)
 
+@app.put("/admin/users/{user_id}", response_model=schemas.UserOut)
+def update_user(
+    user_id: int,
+    user_update: schemas.UserUpdate,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(get_current_admin_user)
+):
+    # Check if user exists
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Prevent admin from disabling their own account
+    if user_id == current_admin.id and user_update.is_active is False:
+        raise HTTPException(status_code=400, detail="Cannot disable your own account")
+    
+    # Update the user
+    updated_user = crud.update_user(db, user_id, user_update)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return updated_user
+
 # Car Endpoints (Updated for multi-tenancy)
 @app.post("/cars/", response_model=schemas.CarOut, status_code=status.HTTP_201_CREATED)
 def create_car(

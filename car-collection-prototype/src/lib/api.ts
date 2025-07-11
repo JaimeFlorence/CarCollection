@@ -263,6 +263,13 @@ class ApiService {
     });
   }
 
+  async updateUser(userId: number, userUpdate: Partial<User>): Promise<User> {
+    return this.request<User>(`/admin/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(userUpdate),
+    });
+  }
+
   // Car endpoints (now require authentication)
   async getCars(): Promise<Car[]> {
     return this.request<Car[]>('/cars/');

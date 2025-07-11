@@ -548,7 +548,44 @@ Implemented a complete backup and restore system with XML format:
 
 ---
 
-**Last Updated**: January 10, 2025 (Evening)
+### ✅ User Edit and Disable Feature - January 11, 2025
+
+Implemented complete user management functionality with edit and disable capabilities:
+
+1. **Backend Implementation**:
+   - Added PUT endpoint `/admin/users/{user_id}` for updating user details
+   - Supports updating username, email, is_admin, and is_active status
+   - Prevents admin from disabling their own account
+   - Authentication already checks for active users (inactive users cannot login)
+
+2. **Frontend Implementation**:
+   - Added Edit button for each user in the Admin page table
+   - Created Edit User dialog with all editable fields
+   - Added "Active Account" checkbox to enable/disable users
+   - Warning message shown when disabling an account
+   - Updates user list immediately after successful edit
+
+3. **Security Features**:
+   - Only administrators can edit users
+   - Cannot disable your own admin account
+   - Disabled users cannot login
+   - All changes are immediately reflected in the UI
+
+4. **Files Modified**:
+   - `/backend/app/main.py` - Added update user endpoint
+   - `/car-collection-prototype/src/app/admin/page.tsx` - Added edit functionality
+   - `/car-collection-prototype/src/lib/api.ts` - Added updateUser method
+   - `/backend/test_user_update.py` - Created test script for validation
+
+5. **Testing**:
+   - Created comprehensive test script that validates all functionality
+   - Tested email updates, user disabling/enabling
+   - Verified self-disable prevention works correctly
+   - All tests passing successfully
+
+---
+
+**Last Updated**: January 11, 2025
 **Next Steps**: Test the full backup/clear/restore cycle
 
 ---

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, UserCreateByAdmin, apiService } from '@/lib/api';
+import { User, apiService } from '@/lib/api';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Header } from '@/components/Header';
 import { DataManagement } from '@/components/DataManagement';
@@ -12,6 +12,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -19,6 +21,13 @@ export default function AdminPage() {
     password: '',
     is_admin: false,
     send_invitation: false,
+  });
+  const [editFormData, setEditFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    is_admin: false,
+    is_active: true,
   });
 
   useEffect(() => {
@@ -67,6 +76,56 @@ export default function AdminPage() {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setEditFormData({
+      ...editFormData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    
+    try {
+      setFormLoading(true);
+      // Only include password if it's not empty
+      const updateData: any = {
+        username: editFormData.username,
+        email: editFormData.email,
+        is_admin: editFormData.is_admin,
+        is_active: editFormData.is_active,
+      };
+      
+      if (editFormData.password) {
+        updateData.password = editFormData.password;
+      }
+      
+      await apiService.updateUser(editingUser.id, updateData);
+      await loadUsers();
+      setShowEditForm(false);
+      setEditingUser(null);
+    } catch (err: any) {
+      setError('Failed to update user');
+      console.error('Error updating user:', err);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const openEditForm = (user: User) => {
+    setEditingUser(user);
+    setEditFormData({
+      username: user.username,
+      email: user.email,
+      password: '', // Empty by default - only set if admin wants to change it
+      is_admin: user.is_admin,
+      is_active: user.is_active,
+    });
+    setShowEditForm(true);
   };
 
   return (
@@ -130,6 +189,9 @@ export default function AdminPage() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Created
                         </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -174,6 +236,14 @@ export default function AdminPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {new Date(user.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={() => openEditForm(user)}
+                              className="text-indigo-600 hover:text-indigo-900"
+                            >
+                              Edit
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -280,6 +350,111 @@ export default function AdminPage() {
                           className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
                         >
                           {formLoading ? 'Creating...' : 'Create User'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showEditForm && editingUser && (
+              <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                  <div className="mt-3">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Edit User
+                    </h3>
+                    <form onSubmit={handleEditUser} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Username
+                        </label>
+                        <input
+                          type="text"
+                          name="username"
+                          required
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          value={editFormData.username}
+                          onChange={handleEditChange}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          required
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          value={editFormData.email}
+                          onChange={handleEditChange}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          New Password (leave blank to keep current)
+                        </label>
+                        <input
+                          type="password"
+                          name="password"
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          value={editFormData.password}
+                          onChange={handleEditChange}
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="is_admin"
+                            className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                            checked={editFormData.is_admin}
+                            onChange={handleEditChange}
+                          />
+                          <span className="ml-2 text-sm text-gray-700">
+                            Administrator
+                          </span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="is_active"
+                            className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                            checked={editFormData.is_active}
+                            onChange={handleEditChange}
+                          />
+                          <span className="ml-2 text-sm text-gray-700">
+                            Active Account
+                          </span>
+                        </label>
+                        {!editFormData.is_active && (
+                          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                            <p className="text-sm text-yellow-800">
+                              ⚠️ Disabling this account will prevent the user from logging in.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex justify-end space-x-3 pt-4">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowEditForm(false);
+                            setEditingUser(null);
+                          }}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={formLoading}
+                          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                        >
+                          {formLoading ? 'Updating...' : 'Update User'}
                         </button>
                       </div>
                     </form>
