@@ -95,6 +95,45 @@ CarCollection/
 - **Layout**: Card-based design with smooth animations
 - **Responsive**: Mobile-first design approach
 
+## 🧪 Testing
+
+The application includes comprehensive test coverage for both frontend and backend components. See [TESTING.md](TESTING.md) for detailed testing documentation.
+
+### Quick Start - Running Tests
+
+**Frontend Tests:**
+```bash
+cd car-collection-prototype
+npm test                    # Run all tests
+npm test -- --coverage      # Run with coverage report
+npm test -- --watch         # Run in watch mode
+```
+
+**Backend Tests:**
+```bash
+cd backend
+source venv/bin/activate    # Activate virtual environment
+python -m pytest            # Run all tests
+python -m pytest -v         # Run with verbose output
+```
+
+**Pre-deployment Testing:**
+```bash
+cd deployment
+./pre-deploy-routing-test.sh  # Verify routing before deployment
+```
+
+### Test Coverage
+
+Current coverage: **7/10** - Includes unit tests, integration tests, and routing verification.
+
+Key test areas:
+- Component unit tests
+- API endpoint security
+- Admin routing configuration
+- Authentication flows
+- Multi-tenancy isolation
+
 ## 🔧 Development Guidelines
 
 ### Code Style

@@ -392,8 +392,8 @@ Anonymous service data for industry trends:
 
 ## 🧪 Testing Strategy & Coverage Assessment
 
-### Current Test Coverage Status (6/10)
-**Last Assessment**: January 10, 2025
+### Current Test Coverage Status (7/10)
+**Last Assessment**: January 11, 2025
 
 #### ✅ What's Well Tested
 - **Frontend Components**: 
@@ -401,11 +401,16 @@ Anonymous service data for industry trends:
   - ServiceEntryDialog (12 tests)
   - ServiceHistoryTable (8 tests)
   - ServiceIntervalList, ConfirmDialog, ServiceIntervalResearch
+  - **AdminPage (13 tests - NEW)** - Full admin functionality coverage
 - **Backend**:
   - Authentication flows (login, JWT tokens)
   - Basic CRUD operations for cars, todos, service intervals
   - Multi-tenancy isolation
   - Service history creation
+  - **Admin routes (17 tests - NEW)** - Security and access control
+- **Integration**:
+  - **Nginx routing (16 tests - NEW)** - Frontend vs backend routing
+  - Pre-deployment verification scripts
 
 #### 🚨 Critical Testing Gaps
 
@@ -479,6 +484,15 @@ Anonymous service data for industry trends:
 - Run tests before every commit
 - Fix failing tests immediately
 - Document complex test scenarios
+- Run pre-deployment tests before any deployment
+
+### Testing Documentation
+See [TESTING.md](TESTING.md) for comprehensive testing guide including:
+- Test organization and structure
+- Running tests (frontend, backend, integration)
+- Writing new tests with templates
+- Common testing scenarios
+- Debugging test failures
 
 ---
 
