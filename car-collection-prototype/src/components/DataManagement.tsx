@@ -98,12 +98,24 @@ export function DataManagement() {
       const formData = new FormData();
       formData.append('file', file);
       
-      await apiService.importData(formData);
+      const result = await apiService.importData(formData);
       
-      setSuccess('Data imported successfully! The page will reload...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      // Check if any cars were skipped
+      if (result.skipped_cars && result.skipped_cars.length > 0) {
+        const skippedInfo = result.skipped_cars
+          .map((car: any) => `${car.year} ${car.make} ${car.model} (VIN: ${car.vin})`)
+          .join(', ');
+        
+        setSuccess(`${result.message}\n\nSkipped cars: ${skippedInfo}\n\nThe page will reload in 5 seconds...`);
+        setTimeout(() => {
+          window.location.reload();
+        }, 5000);
+      } else {
+        setSuccess('Data imported successfully! The page will reload...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
     } catch (err: any) {
       setError('Failed to import data. Please check the file format.');
       console.error('Import error:', err);

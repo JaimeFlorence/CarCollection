@@ -225,6 +225,9 @@ async def import_data(
     db: Session = Depends(get_db)
 ):
     """Import data from XML backup file."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
         # Read and parse XML file
         content = await file.read()
@@ -241,6 +244,7 @@ async def import_data(
         
         # Keep track of ID mappings (old ID -> new ID)
         car_id_map = {}
+        skipped_cars = []
         
         # Import Cars
         cars_elem = root.find("Cars")
@@ -257,8 +261,24 @@ async def import_data(
                 }
                 
                 # Optional fields
+                vin = None
                 if car_elem.find("VIN") is not None:
-                    car_data["vin"] = car_elem.find("VIN").text
+                    vin = car_elem.find("VIN").text
+                    # Check if VIN already exists in the database
+                    if vin:
+                        existing_car = db.query(models.Car).filter_by(vin=vin).first()
+                        if existing_car:
+                            logger.warning(f"Skipping car with VIN {vin} - already exists in database")
+                            skipped_cars.append({
+                                "make": car_data["make"],
+                                "model": car_data["model"],
+                                "year": car_data["year"],
+                                "vin": vin,
+                                "reason": "VIN already exists"
+                            })
+                            continue
+                    car_data["vin"] = vin
+                    
                 if car_elem.find("LicensePlate") is not None:
                     car_data["license_plate"] = car_elem.find("LicensePlate").text
                 if car_elem.find("InsuranceInfo") is not None:
@@ -303,10 +323,15 @@ async def import_data(
                 history_elem = car_elem.find("ServiceHistory")
                 if history_elem is not None:
                     for service_elem in history_elem.findall("Service"):
+                        performed_date_str = service_elem.find("PerformedDate").text
+                        # Handle both Z and +00:00 timezone formats, as well as naive datetime
+                        if performed_date_str.endswith('Z'):
+                            performed_date_str = performed_date_str.replace('Z', '+00:00')
+                        
                         service_data = {
                             "car_id": new_car.id,
                             "service_item": service_elem.find("ServiceItem").text,
-                            "performed_date": datetime.fromisoformat(service_elem.find("PerformedDate").text),
+                            "performed_date": datetime.fromisoformat(performed_date_str),
                         }
                         
                         if service_elem.find("Mileage") is not None:
@@ -349,24 +374,43 @@ async def import_data(
                 if todo_elem.find("Description") is not None:
                     todo_data["description"] = todo_elem.find("Description").text
                 if todo_elem.find("DueDate") is not None:
-                    todo_data["due_date"] = datetime.fromisoformat(todo_elem.find("DueDate").text)
+                    due_date_str = todo_elem.find("DueDate").text
+                    # Handle both Z and +00:00 timezone formats, as well as naive datetime
+                    if due_date_str.endswith('Z'):
+                        due_date_str = due_date_str.replace('Z', '+00:00')
+                    todo_data["due_date"] = datetime.fromisoformat(due_date_str)
                 
                 todo_create = schemas.ToDoCreate(**todo_data)
                 crud.create_todo(db, todo_create, current_user.id)
         
         db.commit()
         
+        # Prepare response message
+        message = "Data imported successfully"
+        if skipped_cars:
+            message = f"Data imported with {len(skipped_cars)} car(s) skipped due to duplicate VINs"
+        
         # Return summary
-        return {
-            "message": "Data imported successfully",
+        response = {
+            "message": message,
             "imported": {
                 "cars": len(car_id_map),
                 "todos": len(todos_elem.findall("Todo")) if todos_elem is not None else 0,
             }
         }
         
+        if skipped_cars:
+            response["skipped_cars"] = skipped_cars
+            
+        return response
+        
     except ET.ParseError as e:
+        logger.error(f"XML parse error: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Invalid XML format: {str(e)}")
+    except ValueError as e:
+        logger.error(f"Value error during import: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Data format error: {str(e)}")
     except Exception as e:
+        logger.error(f"Import failed for user {current_user.username}: {str(e)}", exc_info=True)
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
