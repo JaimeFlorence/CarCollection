@@ -241,8 +241,8 @@
    - [ ] Photo gallery with service documentation
    - [ ] Advanced filtering and search
 
-5. **Production Deployment**
-   - [ ] Linux VPS setup and configuration
+5. **Staging/Production Deployment**
+   - [x] Linux VPS setup and configuration (Staging)
    - [ ] PostgreSQL database setup
    - [ ] Nginx reverse proxy configuration
    - [ ] SSL certificate setup
@@ -704,8 +704,8 @@ Successfully resolved application crashes when running with an empty database (n
 
 ## 🚀 Deployment Completed - January 10, 2025
 
-### ✅ Production Deployment to VPS
-Successfully deployed the Car Collection Management Application to production:
+### ✅ Staging Deployment to VPS
+Successfully deployed the Car Collection Management Application to staging:
 
 1. **VPS Setup** ✅
    - IP: 93.127.194.202

@@ -29,7 +29,7 @@ class Car(Base):
     year = Column(Integer, nullable=False)
     make = Column(String, nullable=False)
     model = Column(String, nullable=False)
-    vin = Column(String, unique=True, nullable=True)
+    vin = Column(String, nullable=True)  # No unique constraint - just an optional field
     mileage = Column(Integer, nullable=True)
     license_plate = Column(String, nullable=True)
     insurance_info = Column(String, nullable=True)

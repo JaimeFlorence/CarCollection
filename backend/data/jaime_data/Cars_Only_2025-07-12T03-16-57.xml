@@ -1,0 +1,135 @@
+<?xml version="1.0" ?>
+<CarCollectionBackup version="1.0">
+  <Metadata>
+    <ExportDate>2025-07-12T03:17:18.146101</ExportDate>
+    <AppVersion>2.4</AppVersion>
+    <ExportConfig>
+      <IncludeCars>True</IncludeCars>
+      <IncludeTodos>False</IncludeTodos>
+      <IncludeServiceIntervals>False</IncludeServiceIntervals>
+      <IncludeServiceHistory>False</IncludeServiceHistory>
+    </ExportConfig>
+    <RecordCounts>
+      <Cars>13</Cars>
+      <Todos>0</Todos>
+      <ServiceIntervals>0</ServiceIntervals>
+      <ServiceHistory>0</ServiceHistory>
+    </RecordCounts>
+  </Metadata>
+  <Cars>
+    <Car id="1">
+      <Make>Beck</Make>
+      <Model>550 Spyder</Model>
+      <Year>1991</Year>
+      <Mileage>32500</Mileage>
+      <LicensePlate>BLAH</LicensePlate>
+      <InsuranceInfo>Policy #69</InsuranceInfo>
+      <Notes>This is a really dangerous car.</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="2">
+      <Make>Ford</Make>
+      <Model>Model A</Model>
+      <Year>1931</Year>
+      <Mileage>12500</Mileage>
+      <LicensePlate>Yadda</LicensePlate>
+      <InsuranceInfo>Policy #72</InsuranceInfo>
+      <Notes>This is a really slow car.</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="3">
+      <Make>Ford</Make>
+      <Model>Model B Hotrod</Model>
+      <Year>1932</Year>
+      <Mileage>22500</Mileage>
+      <Notes>This is a really fast car.</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="4">
+      <Make>Ford</Make>
+      <Model>Standard Coupe</Model>
+      <Year>1939</Year>
+      <Mileage>24500</Mileage>
+      <Notes>This is a bitchin car.</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="5">
+      <Make>Chevrolet</Make>
+      <Model>Chevelle 2 Door Wagon</Model>
+      <Year>1964</Year>
+      <Mileage>48500</Mileage>
+      <Notes>Super bitchin fast car.</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="6">
+      <Make>Porsche</Make>
+      <Model>911 (993) Turbo</Model>
+      <Year>1996</Year>
+      <Mileage>45500</Mileage>
+      <Notes>This is another super fast car</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="7">
+      <Make>Ferrari</Make>
+      <Model>355 F1 Berlinetta</Model>
+      <Year>1998</Year>
+      <VIN>ZFFXR41A2W0111503</VIN>
+      <Mileage>44062</Mileage>
+      <LicensePlate>CAK8137</LicensePlate>
+      <Notes>I love this car!</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="8">
+      <Make>Ford</Make>
+      <Model>Roadster Pickup</Model>
+      <Year>1929</Year>
+      <Mileage>24400</Mileage>
+      <Notes>Old truck.</Notes>
+      <GroupName>Collector Cars</GroupName>
+    </Car>
+    <Car id="9">
+      <Make>Ford</Make>
+      <Model>Ranger Pickup</Model>
+      <Year>1996</Year>
+      <Mileage>175500</Mileage>
+      <Notes>Old farm truck.</Notes>
+      <GroupName>Daily Drivers</GroupName>
+    </Car>
+    <Car id="10">
+      <Make>Tesla</Make>
+      <Model>Model 3 Performance</Model>
+      <Year>2019</Year>
+      <Mileage>71616</Mileage>
+      <Notes>Modern electric car</Notes>
+      <GroupName>Daily Drivers</GroupName>
+    </Car>
+    <Car id="11">
+      <Make>Ford</Make>
+      <Model>Expedition</Model>
+      <Year>2021</Year>
+      <Mileage>67155</Mileage>
+      <Notes>Family SUV</Notes>
+      <GroupName>Daily Drivers</GroupName>
+    </Car>
+    <Car id="12">
+      <Make>Ford</Make>
+      <Model>F-250 Super Duty</Model>
+      <Year>2021</Year>
+      <VIN>1FT8X2BT2MED30930</VIN>
+      <Mileage>52535</Mileage>
+      <LicensePlate>C38189X</LicensePlate>
+      <Notes>Work truck
+VIN: 1FT8X2BT2MED30930</Notes>
+      <GroupName>Daily Drivers</GroupName>
+    </Car>
+    <Car id="13">
+      <Make>Monaco</Make>
+      <Model>Signature</Model>
+      <Year>2005</Year>
+      <VIN>1RF18561851036930</VIN>
+      <Mileage>134206</Mileage>
+      <Notes>RV for trips</Notes>
+      <GroupName>Daily Drivers</GroupName>
+    </Car>
+  </Cars>
+</CarCollectionBackup>

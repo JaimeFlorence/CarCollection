@@ -152,8 +152,9 @@
 
 ### Infrastructure
 - **Development**: Local development
+- **Staging**: Linux VPS (deployed)
 - **Production**: Linux VPS (planned)
-- **Database**: PostgreSQL (production)
+- **Database**: SQLite (staging) / PostgreSQL (production planned)
 - **File Storage**: Local (dev) / S3 (prod planned)
 
 ## 🚀 Deployment Strategy
@@ -163,7 +164,7 @@
 - Backend: `uvicorn app.main:app --reload` (port 8000)
 - Database: SQLite file
 
-### Production Environment ✅ DEPLOYED (January 10, 2025)
+### Staging Environment ✅ DEPLOYED (January 10, 2025)
 - **Hosting**: VPS at 93.127.194.202
 - **Frontend**: Next.js production build (port 3001)
 - **Backend**: Gunicorn + Uvicorn workers (port 8000)
