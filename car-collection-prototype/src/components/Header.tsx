@@ -4,11 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { ChangePasswordDialog } from './ChangePasswordDialog';
+import { DataManagementDialog } from './DataManagementDialog';
 
 export function Header() {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showDataManagementDialog, setShowDataManagementDialog] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
@@ -112,6 +114,15 @@ export function Header() {
                     >
                       Change Password
                     </button>
+                    <button
+                      onClick={() => {
+                        setShowDataManagementDialog(true);
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Data Management
+                    </button>
                     <hr className="my-1 border-gray-200" />
                     <button
                       onClick={() => {
@@ -134,6 +145,11 @@ export function Header() {
       <ChangePasswordDialog
         isOpen={showPasswordDialog}
         onClose={() => setShowPasswordDialog(false)}
+      />
+      
+      <DataManagementDialog
+        isOpen={showDataManagementDialog}
+        onClose={() => setShowDataManagementDialog(false)}
       />
     </>
   );

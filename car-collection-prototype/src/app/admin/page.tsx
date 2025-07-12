@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { User, apiService } from '@/lib/api';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Header } from '@/components/Header';
-import { DataManagement } from '@/components/DataManagement';
 import { InvitationManagement } from '@/components/InvitationManagement';
 
 export default function AdminPage() {
@@ -256,11 +255,6 @@ export default function AdminPage() {
             {/* Invitation Management Section */}
             <div className="mt-8">
               <InvitationManagement />
-            </div>
-
-            {/* Data Management Section */}
-            <div className="mt-8">
-              <DataManagement />
             </div>
 
             {showCreateForm && (

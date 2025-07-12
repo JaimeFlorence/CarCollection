@@ -27,7 +27,6 @@ def create_xml_export(user: models.User, db: Session, include_cars: bool = True,
     # Add metadata
     metadata = ET.SubElement(root, "Metadata")
     ET.SubElement(metadata, "ExportDate").text = datetime.utcnow().isoformat()
-    ET.SubElement(metadata, "Username").text = user.username
     ET.SubElement(metadata, "AppVersion").text = "2.4"
     
     # Add export configuration

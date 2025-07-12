@@ -11,6 +11,8 @@ export function DataManagement() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [lastBackupDate, setLastBackupDate] = useState<string | null>(null);
+  const [showFilenameDialog, setShowFilenameDialog] = useState(false);
+  const [customFilename, setCustomFilename] = useState('');
   
   // Export options
   const [exportOptions, setExportOptions] = useState({
@@ -20,7 +22,20 @@ export function DataManagement() {
     includeServiceHistory: true,
   });
 
-  const handleExport = async () => {
+  const generateDefaultFilename = () => {
+    // Generate filename based on selected options
+    const data_types = [];
+    if (exportOptions.includeCars) data_types.push('cars');
+    if (exportOptions.includeTodos) data_types.push('todos');
+    if (exportOptions.includeServiceIntervals) data_types.push('intervals');
+    if (exportOptions.includeServiceHistory) data_types.push('history');
+    
+    const suffix = data_types.length > 0 ? data_types.join('_') : 'backup';
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    return `car_collection_${suffix}_${timestamp}.xml`;
+  };
+
+  const handleExportClick = () => {
     // Check if at least one option is selected
     if (!exportOptions.includeCars && !exportOptions.includeTodos && 
         !exportOptions.includeServiceIntervals && !exportOptions.includeServiceHistory) {
@@ -28,9 +43,22 @@ export function DataManagement() {
       return;
     }
     
+    // Set default filename and show dialog
+    setCustomFilename(generateDefaultFilename());
+    setShowFilenameDialog(true);
+  };
+
+  const handleExport = async () => {
     try {
       setLoading(true);
       setError(null);
+      setShowFilenameDialog(false);
+      
+      // Ensure filename has .xml extension
+      let filename = customFilename.trim();
+      if (!filename.toLowerCase().endsWith('.xml')) {
+        filename += '.xml';
+      }
       
       // Call API to generate XML export with options
       const response = await apiService.exportData(exportOptions);
@@ -43,8 +71,7 @@ export function DataManagement() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      // The filename will be set by the backend based on what's included
-      a.download = `car_collection_backup_${new Date().toISOString().replace(/[:.]/g, '-')}.xml`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -214,7 +241,7 @@ export function DataManagement() {
               </div>
               
               <button
-                onClick={handleExport}
+                onClick={handleExportClick}
                 disabled={loading}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition disabled:opacity-50"
               >
@@ -305,6 +332,55 @@ export function DataManagement() {
                   className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50"
                 >
                   {loading ? 'Clearing...' : 'Clear All Data'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Filename Dialog */}
+      {showFilenameDialog && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                📁 Export Filename
+              </h3>
+              <p className="text-gray-700 mb-4">
+                Enter a filename for your export:
+              </p>
+              <input
+                type="text"
+                value={customFilename}
+                onChange={(e) => setCustomFilename(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4"
+                placeholder="Enter filename"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && customFilename.trim()) {
+                    handleExport();
+                  }
+                }}
+              />
+              <p className="text-xs text-gray-500 mb-4">
+                The .xml extension will be added if not provided
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowFilenameDialog(false);
+                    setCustomFilename('');
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExport}
+                  disabled={!customFilename.trim() || loading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Export
                 </button>
               </div>
             </div>
