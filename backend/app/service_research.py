@@ -655,11 +655,148 @@ class ServiceIntervalResearcher:
     def _merge_intervals(self, intervals: List[ServiceInterval]) -> List[ServiceInterval]:
         """Merge intervals from multiple sources, handling duplicates"""
         if not intervals:
-            return []
+            # Return industry standard defaults when no manufacturer-specific data is found
+            return self._get_industry_standard_intervals()
         
         # For now, since we only have one source, just return the intervals
         # In the future with multiple sources, we would merge duplicates here
         return intervals
+    
+    def _get_industry_standard_intervals(self) -> List[ServiceInterval]:
+        """Get industry standard intervals when no manufacturer data is available"""
+        return [
+            ServiceInterval(
+                service_item="Engine Oil & Filter",
+                interval_miles=5000,
+                interval_months=6,
+                priority="high",
+                cost_estimate_low=30.0,
+                cost_estimate_high=75.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Check owner's manual for specific oil type"
+            ),
+            ServiceInterval(
+                service_item="Tire Rotation",
+                interval_miles=5000,
+                interval_months=6,
+                priority="medium",
+                cost_estimate_low=20.0,
+                cost_estimate_high=50.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Helps ensure even tire wear"
+            ),
+            ServiceInterval(
+                service_item="Engine Air Filter",
+                interval_miles=30000,
+                interval_months=36,
+                priority="medium",
+                cost_estimate_low=25.0,
+                cost_estimate_high=50.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Replace more frequently in dusty conditions"
+            ),
+            ServiceInterval(
+                service_item="Cabin Air Filter",
+                interval_miles=15000,
+                interval_months=12,
+                priority="low",
+                cost_estimate_low=25.0,
+                cost_estimate_high=60.0,
+                source="Industry Standards",
+                confidence_score=7
+            ),
+            ServiceInterval(
+                service_item="Brake Fluid",
+                interval_miles=30000,
+                interval_months=36,
+                priority="high",
+                cost_estimate_low=70.0,
+                cost_estimate_high=120.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Critical for brake system performance"
+            ),
+            ServiceInterval(
+                service_item="Transmission Fluid",
+                interval_miles=60000,
+                interval_months=60,
+                priority="high",
+                cost_estimate_low=150.0,
+                cost_estimate_high=300.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Check owner's manual - some are lifetime fill"
+            ),
+            ServiceInterval(
+                service_item="Coolant/Antifreeze",
+                interval_miles=60000,
+                interval_months=60,
+                priority="high",
+                cost_estimate_low=100.0,
+                cost_estimate_high=150.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Use manufacturer-specified coolant type"
+            ),
+            ServiceInterval(
+                service_item="Spark Plugs",
+                interval_miles=100000,
+                interval_months=120,
+                priority="medium",
+                cost_estimate_low=150.0,
+                cost_estimate_high=300.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Platinum/Iridium plugs last longer"
+            ),
+            ServiceInterval(
+                service_item="Battery Test",
+                interval_miles=None,
+                interval_months=12,
+                priority="medium",
+                cost_estimate_low=0.0,
+                cost_estimate_high=20.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Most batteries last 3-5 years"
+            ),
+            ServiceInterval(
+                service_item="Brake Inspection",
+                interval_miles=12000,
+                interval_months=12,
+                priority="high",
+                cost_estimate_low=0.0,
+                cost_estimate_high=50.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Visual inspection of pads, rotors, and fluid"
+            ),
+            ServiceInterval(
+                service_item="Multi-Point Inspection",
+                interval_miles=5000,
+                interval_months=6,
+                priority="medium",
+                cost_estimate_low=0.0,
+                cost_estimate_high=0.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Comprehensive check of vehicle systems"
+            ),
+            ServiceInterval(
+                service_item="Wheel Alignment Check",
+                interval_miles=None,
+                interval_months=12,
+                priority="medium",
+                cost_estimate_low=0.0,
+                cost_estimate_high=30.0,
+                source="Industry Standards",
+                confidence_score=7,
+                notes="Check if vehicle pulls or tires wear unevenly"
+            )
+        ]
     
     def _calculate_confidence(self, intervals: List[ServiceInterval]) -> int:
         """Calculate overall confidence score"""

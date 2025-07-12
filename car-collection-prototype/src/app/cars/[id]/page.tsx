@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from "react";
 import { apiService, ToDo, ServiceInterval, ServiceIntervalCreate, ServiceHistory } from "@/lib/api";
-import { DEFAULT_SERVICE_INTERVALS } from "@/lib/defaultServiceIntervals";
 import ToDosTab from "@/components/ToDosTab";
 import ServiceIntervalList from "@/components/ServiceIntervalList";
 import ServiceIntervalEditModal from "@/components/ServiceIntervalEditModal";
@@ -200,37 +199,6 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
     }
   };
 
-  const handleApplyDefaultIntervals = async () => {
-    const confirmation = confirm(
-      `Apply standard maintenance schedule for your ${car.year} ${car.make} ${car.model}?\n\n` +
-      `This will add ${DEFAULT_SERVICE_INTERVALS.length} common service intervals including:\n` +
-      `- Oil changes every 5,000 miles\n` +
-      `- Tire rotations every 7,500 miles\n` +
-      `- Brake inspections every 20,000 miles\n` +
-      `- And 7 other essential services\n\n` +
-      `You can edit or remove any of these intervals after they're added.`
-    );
-    
-    if (confirmation) {
-      try {
-        const defaultIntervals = DEFAULT_SERVICE_INTERVALS.map(interval => ({
-          ...interval,
-          car_id: Number(id)
-        }));
-        
-        await apiService.createServiceIntervals(Number(id), defaultIntervals);
-        
-        // Refresh the intervals list
-        const updatedIntervals = await apiService.getServiceIntervals(Number(id));
-        setServiceIntervals(updatedIntervals);
-        
-        alert(`Successfully added ${DEFAULT_SERVICE_INTERVALS.length} standard service intervals to your schedule!`);
-      } catch (error) {
-        console.error('Failed to apply default intervals:', error);
-        alert('Failed to apply default intervals. Please try again.');
-      }
-    }
-  };
 
   const needsEngineTypeSelection = (make: string, model: string) => {
     const makeModel = `${make} ${model}`.toLowerCase();
@@ -297,35 +265,9 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
           alert(`Successfully added ${research.suggested_intervals.length} service intervals to your schedule!`);
         }
       } else {
-        // No research results found, offer default intervals
-        const useDefaults = confirm(
-          `No specific service intervals found for your ${car.year} ${car.make} ${car.model}.\n\n` +
-          `Would you like to apply a standard maintenance schedule instead?\n\n` +
-          `This includes common services like:\n` +
-          `- Oil changes every 5,000 miles\n` +
-          `- Tire rotations every 7,500 miles\n` +
-          `- Brake inspections every 20,000 miles\n` +
-          `- And 7 other essential services\n\n` +
-          `You can always modify these intervals later.`
-        );
-        
-        if (useDefaults) {
-          // Create intervals from defaults
-          const defaultIntervals = DEFAULT_SERVICE_INTERVALS.map(interval => ({
-            ...interval,
-            car_id: Number(id)
-          }));
-          
-          await apiService.createServiceIntervals(Number(id), defaultIntervals);
-          
-          // Refresh the intervals list
-          const updatedIntervals = await apiService.getServiceIntervals(Number(id));
-          setServiceIntervals(updatedIntervals);
-          
-          alert(`Successfully added ${DEFAULT_SERVICE_INTERVALS.length} standard service intervals to your schedule!`);
-        } else {
-          alert('No service intervals added. You can add custom intervals manually using the "Add Interval" button.');
-        }
+        // The backend now always returns intervals (industry standards if no manufacturer data)
+        // This should rarely happen, but we'll keep a simple message just in case
+        alert('No service intervals found. Please try again or add intervals manually.');
       }
     } catch (error) {
       console.error('Failed to research intervals:', error);
@@ -708,15 +650,6 @@ export default function CarDetails({ params }: { params: Promise<{ id: string }>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                       </svg>
                       Add Interval
-                    </button>
-                    <button
-                      onClick={handleApplyDefaultIntervals}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Apply Standard
                     </button>
                     <button 
                       onClick={() => {
